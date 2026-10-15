@@ -8,7 +8,7 @@ public record WasteRecordResponse(
         Integer id,
         LocalDate recordDate,
         String unitName,
-        String wasteTypeId,
+        String wasteTypeName,
         BigDecimal weightKg,
         String observations,
         String insertedBy,
