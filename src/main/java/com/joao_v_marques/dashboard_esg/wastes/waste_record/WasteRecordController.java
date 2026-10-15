@@ -35,4 +35,11 @@ public class WasteRecordController {
 
         return ResponseEntity.created(location).body(created);
     }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<WasteRecordResponse> update(@PathVariable Integer id, @Valid @RequestBody WasteRecordRequest request, @AuthenticationPrincipal UserPrincipal currentUser) {
+        WasteRecordResponse updated = wasteRecordService.update(id, request, currentUser);
+
+        return ResponseEntity.ok().body(updated);
+    }
 }

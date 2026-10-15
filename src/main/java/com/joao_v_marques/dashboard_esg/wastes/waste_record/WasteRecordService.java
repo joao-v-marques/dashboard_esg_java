@@ -13,6 +13,7 @@ import com.joao_v_marques.dashboard_esg.wastes.waste_type.WasteTypeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -60,6 +61,33 @@ public class WasteRecordService {
         wasteRecord.setInsertedBy(insertedBy);
 
         wasteRecordRepository.save(wasteRecord);
+
+        return toResponse(wasteRecord);
+    }
+
+    @Transactional
+    public WasteRecordResponse update(Integer id, WasteRecordRequest request, UserPrincipal currentUser) {
+        String observations = request.observations() != null ? request.observations().trim() : null;
+
+        // Confirmar se o WasteRecord que passou realmente existe
+        WasteRecord wasteRecord = wasteRecordRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum registro de resíduo com o ID informado."));
+
+        // Validação das FK
+        Unit unit = unitRepository.findById(request.unitId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhuma unidade com o ID informado."));
+        WasteType wasteType = wasteTypeRepository.findById(request.wasteTypeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado tipo de resíduo com o ID informado."));
+        User updatedBy = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado usuário com o ID informado."));
+
+        wasteRecord.setRecordDate(request.recordDate());
+        wasteRecord.setUnit(unit);
+        wasteRecord.setWasteType(wasteType);
+        wasteRecord.setWeightKg(request.weightKg());
+        wasteRecord.setObservations(observations);
+        wasteRecord.setUpdatedAt(OffsetDateTime.now());
+        wasteRecord.setUpdatedBy(updatedBy);
 
         return toResponse(wasteRecord);
     }
