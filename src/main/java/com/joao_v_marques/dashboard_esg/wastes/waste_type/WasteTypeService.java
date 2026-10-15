@@ -1,5 +1,6 @@
 package com.joao_v_marques.dashboard_esg.wastes.waste_type;
 
+import com.joao_v_marques.dashboard_esg.wastes.waste_type.dto.WasteTypeRequest;
 import com.joao_v_marques.dashboard_esg.wastes.waste_type.dto.WasteTypeResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,23 @@ public class WasteTypeService {
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    @Transactional
+    public WasteTypeResponse create(WasteTypeRequest request) {
+        String name = request.name().trim();
+        String code = request.code().trim();
+
+        // Transformar a DTO em entidade
+        WasteType wasteType = new WasteType();
+        wasteType.setName(name);
+        wasteType.setCode(code);
+        wasteType.setRecyclable(request.isRecyclable());
+
+        // Realizar a inserção no banco
+        wasteTypeRepository.save(wasteType);
+
+        return toResponse(wasteType);
     }
 
     private WasteTypeResponse toResponse(WasteType wasteType) {
