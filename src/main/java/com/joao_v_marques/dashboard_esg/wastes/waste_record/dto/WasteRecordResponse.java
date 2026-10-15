@@ -14,6 +14,6 @@ public record WasteRecordResponse(
         String insertedBy,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt,
-        String UpdatedBy
+        String updatedBy
 ) {
 }
