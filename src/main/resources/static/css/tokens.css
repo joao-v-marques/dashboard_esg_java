@@ -1,0 +1,120 @@
+/* ==========================================================================
+   tokens.css
+   Única fonte de verdade de cor, tipografia, espaçamento, raio e sombra.
+   Camada 1 (--palette-*) são valores brutos; camada 2 (--color-*) são papéis
+   semânticos, que é o que o resto do CSS consome. Por enquanto só tema claro.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* Camada 1 — paleta bruta ------------------------------------------------ */
+  --palette-green-25:  #f6faf7;
+  --palette-green-50:  #edf6f0;
+  --palette-green-100: #d7ece0;
+  --palette-green-200: #b3dbc5;
+  --palette-green-500: #00995d;  /* primária institucional */
+  --palette-green-600: #007a4a;  /* botões e links (AA sobre branco) */
+  --palette-green-700: #00623b;
+  --palette-green-800: #0b4f33;
+
+  --palette-teal-800:  #004e4c;  /* verde petróleo */
+  --palette-teal-900:  #003a38;
+
+  --palette-lime-400:  #b1d34b;
+  --palette-lime-100:  #eef5d6;
+  --palette-lime-700:  #5b7417;
+
+  --palette-sky-100:   #e2eff4;
+  --palette-sky-700:   #23637a;
+
+  --palette-red-50:    #fdf0ef;
+  --palette-red-200:   #f3c4bf;
+  --palette-red-700:   #b3261e;
+
+  --palette-neutral-0:   #ffffff;
+  --palette-neutral-50:  #f4f7f5;
+  --palette-neutral-100: #e8eeea;
+  --palette-neutral-200: #dbe3de;
+  --palette-neutral-400: #8b9a92;
+  --palette-neutral-500: #64746b;
+  --palette-neutral-700: #34463d;
+  --palette-neutral-900: #14251d;
+
+  /* Camada 2 — papéis semânticos ------------------------------------------ */
+  --color-bg:              var(--palette-neutral-50);
+  --color-surface:         var(--palette-neutral-0);
+  --color-surface-subtle:  var(--palette-green-25);
+  --color-surface-tint:    var(--palette-green-50);
+  --color-border:          var(--palette-neutral-200);
+  --color-border-subtle:   var(--palette-neutral-100);
+
+  --color-text:            var(--palette-neutral-900);
+  --color-text-secondary:  var(--palette-neutral-700);
+  --color-text-muted:      var(--palette-neutral-500);
+  --color-text-faint:      var(--palette-neutral-400);
+  --color-text-on-brand:   var(--palette-neutral-0);
+
+  --color-brand:           var(--palette-green-500);
+  --color-brand-strong:    var(--palette-green-600);
+  --color-brand-stronger:  var(--palette-green-700);
+  --color-brand-soft:      var(--palette-green-100);
+  --color-brand-deep:      var(--palette-teal-800);
+  --color-brand-deeper:    var(--palette-teal-900);
+  --color-accent:          var(--palette-lime-400);
+
+  --color-pillar-e:        var(--palette-green-600);
+  --color-pillar-e-bg:     var(--palette-green-50);
+  --color-pillar-s:        var(--palette-sky-700);
+  --color-pillar-s-bg:     var(--palette-sky-100);
+  --color-pillar-g:        var(--palette-lime-700);
+  --color-pillar-g-bg:     var(--palette-lime-100);
+
+  --color-danger:          var(--palette-red-700);
+  --color-danger-bg:       var(--palette-red-50);
+  --color-danger-border:   var(--palette-red-200);
+
+  --color-focus:           rgba(0, 153, 93, 0.35);
+  --color-danger-focus:    rgba(179, 38, 30, 0.18);
+
+  /* Tipografia ------------------------------------------------------------- */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem);
+
+  /* Espaçamento, raio, sombra e layout ------------------------------------ */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  --shadow-xs: 0 1px 2px rgba(20, 37, 29, 0.06);
+  --shadow-sm: 0 1px 3px rgba(20, 37, 29, 0.06), 0 1px 2px rgba(20, 37, 29, 0.04);
+  --shadow-md: 0 8px 24px -8px rgba(20, 37, 29, 0.14), 0 2px 6px rgba(20, 37, 29, 0.05);
+  --shadow-lg: 0 24px 48px -16px rgba(20, 37, 29, 0.22);
+
+  --topbar-height: 68px;
+  --sidebar-width: 256px;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --duration: 180ms;
+}

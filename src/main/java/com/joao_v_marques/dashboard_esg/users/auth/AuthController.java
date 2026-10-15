@@ -56,7 +56,7 @@ public class AuthController {
     // dados mínimos do usuário logado para a interface (o JS não lê o cookie HttpOnly)
     @GetMapping("/me")
     public CurrentUserResponse me(@AuthenticationPrincipal UserPrincipal principal) {
-        return new CurrentUserResponse(principal.getName(), principal.getUsername(), principal.getRoleName());
+        return new CurrentUserResponse(principal.getName(), principal.getUsername(), principal.getRoleName(), principal.getSectorName());
     }
 
     // PATCH para o usuário logado trocar a própria senha

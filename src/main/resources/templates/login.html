@@ -1,0 +1,145 @@
+<!doctype html>
+<!--
+  Login.
+  O Thymeleaf só renderiza a página (caminhos com @{} por causa do context-path).
+  A autenticação é feita por js/login.js via fetch em POST /api/auth/login,
+  que devolve o token em cookie HttpOnly.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="app-base" th:content="@{/}">
+    <title>Entrar · Acompanhamento ESG</title>
+
+    <link rel="icon" type="image/svg+xml" th:href="@{/img/logo.svg}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+
+    <link rel="stylesheet" th:href="@{/css/tokens.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+
+<body class="login-page">
+
+<main class="login">
+
+    <!-- Painel institucional -->
+    <section class="login__brand" aria-labelledby="login-brand-title">
+        <svg class="login__pattern" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-width="1.2">
+                <path d="M-40 620c120-40 180-140 300-150s200 70 380 20"/>
+                <path d="M-40 660c130-40 190-130 310-140s210 80 370 30"/>
+                <path d="M-40 700c140-40 200-120 320-130s220 90 360 40"/>
+                <path d="M-40 740c150-40 210-110 330-120s230 100 350 50"/>
+                <path d="M-40 160c110 30 170 120 290 110s190-110 390-80"/>
+                <path d="M-40 120c120 30 180 110 300 100s200-100 380-70"/>
+                <path d="M-40 80c130 30 190 100 310 90s210-90 370-60"/>
+                <circle cx="470" cy="380" r="60"/>
+                <circle cx="470" cy="380" r="100"/>
+                <circle cx="470" cy="380" r="140"/>
+            </g>
+        </svg>
+
+        <div class="login__brand-inner">
+            <span class="brand brand--inverse">
+                <img class="brand__logo" th:src="@{/img/logo.svg}" alt="" width="40" height="40">
+                <span class="brand__name">Acompanhamento <strong>ESG</strong></span>
+            </span>
+
+            <div class="login__pitch">
+                <p class="login__eyebrow">Ambiental · Social · Governança</p>
+                <h1 class="login__title" id="login-brand-title">
+                    Indicadores que ajudam a construir um futuro <em>mais sustentável</em>.
+                </h1>
+                <p class="login__lead">
+                    Registre, acompanhe e analise as iniciativas ESG da organização em um só lugar.
+                </p>
+            </div>
+
+            <ul class="pillars-mini" aria-label="Pilares do ESG">
+                <li class="pillars-mini__item">
+                    <span class="pillars-mini__badge" aria-hidden="true">E</span>
+                    <span><strong>Ambiental</strong> Cuidado com os recursos naturais</span>
+                </li>
+                <li class="pillars-mini__item">
+                    <span class="pillars-mini__badge" aria-hidden="true">S</span>
+                    <span><strong>Social</strong> Pessoas e comunidade</span>
+                </li>
+                <li class="pillars-mini__item">
+                    <span class="pillars-mini__badge" aria-hidden="true">G</span>
+                    <span><strong>Governança</strong> Transparência e ética</span>
+                </li>
+            </ul>
+
+            <p class="login__copy">© <span th:text="${#dates.year(#dates.createNow())}">2026</span> · Acompanhamento ESG</p>
+        </div>
+    </section>
+
+    <!-- Formulário -->
+    <section class="login__panel" aria-labelledby="login-form-title">
+        <div class="login__card">
+            <span class="brand login__mobile-brand">
+                <img class="brand__logo" th:src="@{/img/logo.svg}" alt="" width="36" height="36">
+                <span class="brand__name">Acompanhamento <strong>ESG</strong></span>
+            </span>
+
+            <header class="login__header">
+                <h2 class="login__form-title" id="login-form-title">Bem-vindo de volta</h2>
+                <p class="login__form-subtitle">Entre com seu usuário e senha para continuar.</p>
+            </header>
+
+            <div class="alert" role="alert" data-login-alert hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                <span data-login-alert-text></span>
+            </div>
+
+            <form class="login__form" data-login-form novalidate>
+                <div class="field" data-field="username">
+                    <label class="field__label" for="username">Usuário</label>
+                    <div class="field__control">
+                        <svg class="field__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+                        <input class="field__input" id="username" name="username" type="text"
+                               autocomplete="username" autocapitalize="none" spellcheck="false"
+                               placeholder="Seu usuário" required aria-describedby="username-error">
+                    </div>
+                    <p class="field__error" id="username-error" data-field-error hidden></p>
+                </div>
+
+                <div class="field" data-field="password">
+                    <label class="field__label" for="password">Senha</label>
+                    <div class="field__control">
+                        <svg class="field__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                        <input class="field__input field__input--with-action" id="password" name="password" type="password"
+                               autocomplete="current-password" placeholder="Sua senha" required
+                               aria-describedby="password-error">
+                        <button class="field__action" type="button" data-toggle-password
+                                aria-label="Mostrar senha" aria-pressed="false" aria-controls="password">
+                            <svg data-icon-show viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg data-icon-hide hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 4.2A10.4 10.4 0 0 1 12 4c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.1 4.1M6.6 6.6A17.4 17.4 0 0 0 2 12s3.5 7 10 7a9.9 9.9 0 0 0 5.4-1.6M3 3l18 18M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+                        </button>
+                    </div>
+                    <p class="field__error" id="password-error" data-field-error hidden></p>
+                    <p class="field__hint" data-capslock hidden>Caps Lock está ativado.</p>
+                </div>
+
+                <button class="btn btn--primary btn--block" type="submit" data-login-submit>
+                    <span class="btn__spinner" data-login-spinner hidden aria-hidden="true"></span>
+                    <span data-login-label>Entrar</span>
+                </button>
+            </form>
+
+            <p class="login__help">
+                Problemas para acessar? Procure o administrador do sistema.
+            </p>
+        </div>
+    </section>
+</main>
+
+<script type="module" th:src="@{/js/login.js}"></script>
+</body>
+</html>

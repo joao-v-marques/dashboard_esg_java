@@ -8,8 +8,8 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    // Usado no login (CustomUserDetailsService), já traz a role para montar a authority
-    @Query("SELECT u FROM User u JOIN FETCH u.role WHERE u.username = :username")
+    // Usado no login (CustomUserDetailsService), já traz a role para montar a authority e o setor para o GET /api/auth/me
+    @Query("SELECT u FROM User u JOIN FETCH u.role JOIN FETCH u.sector WHERE u.username = :username")
     Optional<User> findByUsername(@Param("username") String username);
 
     boolean existsByUsernameIgnoreCase(String username);

@@ -30,6 +30,10 @@ public class UserPrincipal implements UserDetails {
         return user.getRole().getName();
     }
 
+    public String getSectorName() {
+        return user.getSector().getName();
+    }
+
     @Override
     public String getUsername() {
         return user.getUsername();

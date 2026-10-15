@@ -1,0 +1,164 @@
+<!doctype html>
+<!--
+  Início.
+  Topbar e sidebar vêm de fragments/layout.html; o usuário logado é carregado
+  por js/shell.js e a saudação por js/home.js. O conteúdo é propositalmente
+  genérico: os módulos entram na sidebar conforme forem criados.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: appHead('Início')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+
+<body>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header th:replace="~{fragments/layout :: topbar}"></header>
+<aside th:replace="~{fragments/layout :: sidebar('home')}"></aside>
+<div class="sidebar-scrim" data-sidebar-scrim hidden></div>
+
+<main class="app-main" id="conteudo">
+    <div class="page">
+
+        <!-- Cabeçalho ----------------------------------------------------- -->
+        <header class="page-head">
+            <p class="page-head__date" data-today></p>
+            <h1 class="page-head__title">
+                <span data-greeting>Olá</span>, <span class="page-head__name" data-user-first-name><span class="skeleton" style="width: 140px; height: 0.8em"></span></span>
+            </h1>
+            <p class="page-head__subtitle">Que bom ter você por aqui. Veja abaixo um resumo do que a aplicação oferece.</p>
+        </header>
+
+        <!-- Sobre a aplicação --------------------------------------------- -->
+        <section class="card hero" aria-labelledby="titulo-sobre">
+            <div class="hero__text">
+                <span class="tag">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10Z"/><path d="M2 21c0-3 1.9-5.4 5.1-6"/></svg>
+                    Sobre a aplicação
+                </span>
+                <h2 class="hero__title" id="titulo-sobre">Um só lugar para acompanhar a jornada <em>ESG</em> da organização</h2>
+                <p>
+                    O Acompanhamento ESG reúne informações ligadas às práticas ambientais, sociais e de
+                    governança. A proposta é transformar os registros do dia a dia em dados confiáveis,
+                    que apoiam decisões e mostram a evolução das nossas iniciativas ao longo do tempo.
+                </p>
+                <p class="hero__note">
+                    A aplicação é organizada em módulos, acessados pelo menu lateral. Novos módulos
+                    serão incorporados gradualmente.
+                </p>
+            </div>
+
+            <div class="hero__art" aria-hidden="true">
+                <svg viewBox="0 0 320 240" fill="none">
+                    <circle cx="176" cy="116" r="96" fill="#edf6f0"/>
+                    <circle cx="252" cy="58" r="18" fill="#eef5d6"/>
+                    <path d="M40 200h248" stroke="#dbe3de" stroke-width="2" stroke-linecap="round"/>
+                    <rect x="78" y="150" width="26" height="50" rx="6" fill="#d7ece0"/>
+                    <rect x="116" y="126" width="26" height="74" rx="6" fill="#b3dbc5"/>
+                    <rect x="154" y="104" width="26" height="96" rx="6" fill="#7fc4a0"/>
+                    <path d="M91 136 129 112l38-22 40-28" stroke="#007a4a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 6"/>
+                    <circle cx="91" cy="136" r="5" fill="#fff" stroke="#007a4a" stroke-width="2.5"/>
+                    <circle cx="129" cy="112" r="5" fill="#fff" stroke="#007a4a" stroke-width="2.5"/>
+                    <circle cx="167" cy="90" r="5" fill="#fff" stroke="#007a4a" stroke-width="2.5"/>
+                    <path d="M232 200c0-30 2-56 6-80" stroke="#004e4c" stroke-width="3.5" stroke-linecap="round"/>
+                    <path d="M237 132c-26 2-42-12-46-38 26-2 42 12 46 38Z" fill="#00995d"/>
+                    <path d="M237 132c-12-10-22-20-34-30" stroke="#d7ece0" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M239 116c4-28 22-44 50-44-2 28-20 44-50 44Z" fill="#b1d34b"/>
+                    <path d="M239 116c12-12 24-22 38-30" stroke="#eef5d6" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M234 168c-18-4-28-16-28-34 18 2 28 14 28 34Z" fill="#007a4a"/>
+                    <ellipse cx="232" cy="201" rx="26" ry="5" fill="#d7ece0"/>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Pilares ------------------------------------------------------- -->
+        <section class="section" aria-labelledby="titulo-pilares">
+            <div class="section__head">
+                <h2 class="section__title" id="titulo-pilares">Os três pilares do ESG</h2>
+                <p class="section__subtitle">As frentes que orientam os indicadores acompanhados aqui.</p>
+            </div>
+
+            <div class="pillars">
+                <article class="card pillar pillar--e">
+                    <span class="pillar__badge" aria-hidden="true">E</span>
+                    <div>
+                        <h3 class="pillar__title">Ambiental</h3>
+                        <p class="pillar__eyebrow">Environmental</p>
+                    </div>
+                    <p class="pillar__text">
+                        Práticas que reduzem o impacto das nossas atividades no meio ambiente, como o
+                        uso consciente de recursos naturais, energia e materiais.
+                    </p>
+                </article>
+
+                <article class="card pillar pillar--s">
+                    <span class="pillar__badge" aria-hidden="true">S</span>
+                    <div>
+                        <h3 class="pillar__title">Social</h3>
+                        <p class="pillar__eyebrow">Social</p>
+                    </div>
+                    <p class="pillar__text">
+                        Ações voltadas às pessoas: colaboradores, clientes e a comunidade em que a
+                        organização está inserida.
+                    </p>
+                </article>
+
+                <article class="card pillar pillar--g">
+                    <span class="pillar__badge" aria-hidden="true">G</span>
+                    <div>
+                        <h3 class="pillar__title">Governança</h3>
+                        <p class="pillar__eyebrow">Governance</p>
+                    </div>
+                    <p class="pillar__text">
+                        Transparência, ética e responsabilidade na forma como a organização é conduzida
+                        e presta contas.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Como funciona ------------------------------------------------- -->
+        <section class="card steps" aria-labelledby="titulo-como-funciona">
+            <div class="section__head">
+                <h2 class="section__title" id="titulo-como-funciona">Como funciona</h2>
+                <p class="section__subtitle">Um fluxo simples, que se repete em cada módulo.</p>
+            </div>
+
+            <ol class="steps__list">
+                <li class="step">
+                    <span class="step__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    </span>
+                    <div>
+                        <h3 class="step__title"><span class="step__number">01</span> Registre</h3>
+                        <p class="step__text">Lance as informações de cada módulo de forma simples e padronizada.</p>
+                    </div>
+                </li>
+                <li class="step">
+                    <span class="step__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg>
+                    </span>
+                    <div>
+                        <h3 class="step__title"><span class="step__number">02</span> Acompanhe</h3>
+                        <p class="step__text">Consulte o histórico e veja a evolução dos indicadores ao longo do tempo.</p>
+                    </div>
+                </li>
+                <li class="step">
+                    <span class="step__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg>
+                    </span>
+                    <div>
+                        <h3 class="step__title"><span class="step__number">03</span> Analise</h3>
+                        <p class="step__text">Use os dados consolidados para apoiar decisões, metas e relatórios.</p>
+                    </div>
+                </li>
+            </ol>
+        </section>
+
+    </div>
+</main>
+
+<script type="module" th:src="@{/js/home.js}"></script>
+</body>
+</html>
