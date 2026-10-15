@@ -29,7 +29,7 @@ public class WasteTypesController {
     public ResponseEntity<WasteTypeResponse> create(@Valid @RequestBody WasteTypeRequest request) {
         WasteTypeResponse created = wasteTypeService.create(request);
 
-        URI location = URI.create("/api/waste-types" + created.id());
+        URI location = URI.create("/api/waste-types/" + created.id());
 
         return ResponseEntity.created(location).body(created);
     }
