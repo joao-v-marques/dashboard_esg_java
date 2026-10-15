@@ -51,6 +51,6 @@ public class WasteRecord {
     private OffsetDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "updated_by", nullable = false)
+    @JoinColumn(name = "updated_by")
     private User updatedBy;
 }
