@@ -1,5 +1,6 @@
 package com.joao_v_marques.dashboard_esg.wastes.waste_type;
 
+import com.joao_v_marques.dashboard_esg.shared.exceptions.ResourceNotFoundException;
 import com.joao_v_marques.dashboard_esg.wastes.waste_type.dto.WasteTypeRequest;
 import com.joao_v_marques.dashboard_esg.wastes.waste_type.dto.WasteTypeResponse;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,22 @@ public class WasteTypeService {
 
         // Realizar a inserção no banco
         wasteTypeRepository.save(wasteType);
+
+        return toResponse(wasteType);
+    }
+
+    @Transactional
+    public WasteTypeResponse update(Integer id, WasteTypeRequest request) {
+        String name = request.name().trim();
+        String code = request.code().trim();
+
+        // Confirmar se o WasteType que passou realmente existe
+        WasteType wasteType = wasteTypeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum tipo de resíduo com o ID informado."));
+
+        wasteType.setName(name);
+        wasteType.setCode(code);
+        wasteType.setRecyclable(request.isRecyclable());
 
         return toResponse(wasteType);
     }
