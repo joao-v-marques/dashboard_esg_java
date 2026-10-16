@@ -5,7 +5,7 @@
    ========================================================================== */
 
 import { auth, url } from './api.js';
-import { consumeQueryParam } from './ui.js';
+import { consumeQueryParam, setFieldError as markField, clearFieldErrors as clearFields, clearErrorOnInput } from './ui.js';
 
 const REASONS = {
     'sessao-expirada': { type: 'error', text: 'Sua sessão expirou. Entre novamente para continuar.' },
@@ -56,11 +56,7 @@ form.addEventListener('submit', async (event) => {
     }
 });
 
-// Limpa o erro do campo assim que o usuário volta a digitar nele
-form.addEventListener('input', (event) => {
-    const field = event.target.closest('[data-field]');
-    if (field?.classList.contains('is-invalid')) setFieldError(field.dataset.field, null);
-});
+clearErrorOnInput(form);
 
 function validate({ username, password }) {
     let valid = true;
@@ -77,19 +73,11 @@ function validate({ username, password }) {
 }
 
 function setFieldError(name, message) {
-    const field = form.querySelector(`[data-field="${name}"]`);
-    if (!field) return;
-    const error = field.querySelector('[data-field-error]');
-    const input = field.querySelector('input');
-
-    field.classList.toggle('is-invalid', Boolean(message));
-    input.setAttribute('aria-invalid', message ? 'true' : 'false');
-    error.textContent = message ?? '';
-    error.hidden = !message;
+    markField(form, name, message);
 }
 
 function clearFieldErrors() {
-    form.querySelectorAll('[data-field]').forEach((field) => setFieldError(field.dataset.field, null));
+    clearFields(form);
 }
 
 function setLoading(loading) {

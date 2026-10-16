@@ -31,7 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/api/auth/login", "/api/auth/logout", "/error", "/css/**", "/js/**", "/img/**").permitAll()
 
                         // Tela e API de administração: só ADMINISTRATOR. O 403 fora de /api/** redireciona para home?erro=sem-acesso
-                        .requestMatchers("/api/users/**", "/api/roles/**", "/api/sectors/**").hasRole("ADMINISTRATOR")
+                        .requestMatchers("/settings", "/api/users/**", "/api/roles/**", "/api/sectors/**").hasRole("ADMINISTRATOR")
 
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

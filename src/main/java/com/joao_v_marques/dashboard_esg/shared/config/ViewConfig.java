@@ -13,5 +13,6 @@ public class ViewConfig implements WebMvcConfigurer {
         registry.addRedirectViewController("/", "/home");
         registry.addViewController("/login").setViewName("login");
         registry.addViewController("/home").setViewName("home");
+        registry.addViewController("/settings").setViewName("settings");
     }
 }

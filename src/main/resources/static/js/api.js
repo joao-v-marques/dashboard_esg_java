@@ -74,6 +74,14 @@ async function readJson(response) {
     }
 }
 
+// Atalhos por método HTTP, usados pelas telas de cadastro
+export const api = {
+    get: (path) => request(path),
+    post: (path, body) => request(path, { method: 'POST', body }),
+    put: (path, body) => request(path, { method: 'PUT', body }),
+    patch: (path, body) => request(path, { method: 'PATCH', body }),
+};
+
 export const auth = {
     login: (username, password) =>
         request('api/auth/login', { method: 'POST', body: { username, password }, redirectOnUnauthorized: false }),
