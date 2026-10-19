@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "roles")
 @Getter
@@ -12,8 +14,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Role {
 
-    // Nome da role usada no hasRole("ADMINISTRATOR") do SecurityConfig, não pode ser editada nem desativada
+    // Roles usadas no SecurityConfig (hasRole e hierarquia ADMINISTRATOR > MANAGER > EMPLOYEE_WASTES)
     public static final String ADMINISTRATOR = "ADMINISTRATOR";
+    public static final String MANAGER = "MANAGER";
+    public static final String EMPLOYEE_WASTES = "EMPLOYEE_WASTES";
+
+    // Editar ou desativar qualquer uma delas tiraria o acesso de quem a possui
+    public static final Set<String> PROTECTED = Set.of(ADMINISTRATOR, MANAGER, EMPLOYEE_WASTES);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

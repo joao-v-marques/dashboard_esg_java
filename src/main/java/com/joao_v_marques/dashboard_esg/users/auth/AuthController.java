@@ -14,27 +14,34 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private static final String ROLE_PREFIX = "ROLE_";
+
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserService userService;
+    private final RoleHierarchy roleHierarchy;
 
     private final boolean secureCookie;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService, UserService userService, @Value("${app.security.cookie-secure}") boolean secureCookie) {
+    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService, UserService userService, RoleHierarchy roleHierarchy, @Value("${app.security.cookie-secure}") boolean secureCookie) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userService = userService;
+        this.roleHierarchy = roleHierarchy;
         this.secureCookie = secureCookie;
     }
 
@@ -56,7 +63,15 @@ public class AuthController {
     // dados mínimos do usuário logado para a interface (o JS não lê o cookie HttpOnly)
     @GetMapping("/me")
     public CurrentUserResponse me(@AuthenticationPrincipal UserPrincipal principal) {
-        return new CurrentUserResponse(principal.getName(), principal.getUsername(), principal.getRoleName(), principal.getSectorName());
+        List<String> roles = roleHierarchy.getReachableGrantedAuthorities(principal.getAuthorities())
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(authority -> authority.startsWith(ROLE_PREFIX))
+                .map(authority -> authority.substring(ROLE_PREFIX.length()))
+                .sorted()
+                .toList();
+
+        return new CurrentUserResponse(principal.getName(), principal.getUsername(), principal.getRoleName(), principal.getSectorName(), roles);
     }
 
     // PATCH para o usuário logado trocar a própria senha

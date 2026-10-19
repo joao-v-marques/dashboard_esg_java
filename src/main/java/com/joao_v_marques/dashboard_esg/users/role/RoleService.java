@@ -56,9 +56,9 @@ public class RoleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhuma função de usuário com o ID fornecido."));
 
         // Validações que a DTO não cobre
-        // A role ADMINISTRATOR é usada na autorização (hasRole), editá-la ou desativá-la tiraria o acesso dos administradores
-        if (Role.ADMINISTRATOR.equals(role.getName())) {
-            throw new IllegalArgumentException("A role ADMINISTRATOR é protegida e não pode ser alterada ou desativada.");
+        // Roles usadas na autorização (hasRole), editá-las ou desativá-las tiraria o acesso de quem as possui
+        if (Role.PROTECTED.contains(role.getName())) {
+            throw new IllegalArgumentException("A role " + role.getName() + " é usada na autorização e não pode ser alterada ou desativada.");
         }
 
         if (!role.isActive()) {
@@ -81,9 +81,9 @@ public class RoleService {
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhuma função de usuário com o ID fornecido."));
 
-        // A role ADMINISTRATOR é usada na autorização (hasRole), editá-la ou desativá-la tiraria o acesso dos administradores
-        if (Role.ADMINISTRATOR.equals(role.getName())) {
-            throw new IllegalArgumentException("A role ADMINISTRATOR é protegida e não pode ser alterada ou desativada.");
+        // Roles usadas na autorização (hasRole), editá-las ou desativá-las tiraria o acesso de quem as possui
+        if (Role.PROTECTED.contains(role.getName())) {
+            throw new IllegalArgumentException("A role " + role.getName() + " é usada na autorização e não pode ser alterada ou desativada.");
         }
 
         if (!role.isActive()) {
