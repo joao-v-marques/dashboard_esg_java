@@ -103,6 +103,15 @@
   --color-art-lime-soft:   var(--palette-lime-100);
   --color-art-dot:         var(--palette-neutral-0);
 
+  /* Gráficos: cores categóricas em ordem fixa (validadas para daltonismo em
+     claro e escuro). Cada série recebe sempre a mesma cor, nunca pela posição. */
+  --color-chart-1:         #2a78d6;  /* azul */
+  --color-chart-2:         #eb6834;  /* laranja */
+  --color-chart-3:         #1baf7a;  /* água */
+  --color-chart-4:         #eda100;  /* amarelo */
+  --color-chart-grid:      var(--palette-neutral-100);
+  --color-chart-axis:      var(--palette-neutral-200);
+
   /* Tipografia ------------------------------------------------------------- */
   --font-display: "Fraunces", Georgia, "Times New Roman", serif;
   --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -206,6 +215,13 @@
   --color-art-line:        #2c302e;
   --color-art-lime-soft:   #2a3318;
   --color-art-dot:         #171918;
+
+  --color-chart-1:         #3987e5;
+  --color-chart-2:         #d95926;
+  --color-chart-3:         #199e70;
+  --color-chart-4:         #c98500;
+  --color-chart-grid:      #232625;
+  --color-chart-axis:      #2c302e;
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);

@@ -34,4 +34,10 @@ export const ICONS = {
     sort: svg('<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>'),
     sortUp: svg('<path d="m7 14 5-5 5 5"/>'),
     sortDown: svg('<path d="m7 10 5 5 5-5"/>'),
+    chart: svg('<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16v-3M12 16V8M17 16v-6"/>'),
+    percent: svg('<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>'),
+    gauge: svg('<path d="m12 14 4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/>'),
+    arrowUp: svg('<path d="M12 19V5M5 12l7-7 7 7"/>'),
+    arrowDown: svg('<path d="M12 5v14M19 12l-7 7-7-7"/>'),
+    minus: svg('<path d="M5 12h14"/>'),
 };

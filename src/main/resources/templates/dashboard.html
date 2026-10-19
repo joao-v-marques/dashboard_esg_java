@@ -1,0 +1,128 @@
+<!doctype html>
+<!--
+  Dashboard. No topo, as abas de tema (Resíduos, Cooperados...) e os filtros;
+  abaixo, o painel do tema ativo. No desktop tudo cabe em uma tela.
+  Os dados são agregados por js/dashboard/dashboard.js a partir de
+  GET /api/waste-records, /api/waste-types e /api/units.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: appHead('Dashboard')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+
+<body>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header th:replace="~{fragments/layout :: topbar}"></header>
+<aside th:replace="~{fragments/layout :: sidebar('dashboard')}"></aside>
+<div class="sidebar-scrim" data-sidebar-scrim hidden></div>
+
+<main class="app-main app-main--dash" id="conteudo">
+    <div class="dash">
+
+        <!-- Barra superior: tema + filtros ------------------------------- -->
+        <header class="dash-bar">
+            <div class="dash-bar__start">
+                <h1 class="dash-bar__title">Dashboard</h1>
+                <div class="theme-tabs" role="tablist" aria-label="Tema do dashboard" data-theme-tabs>
+                    <button class="theme-tabs__tab" type="button" role="tab" id="tab-residuos" data-tab="residuos"
+                            aria-controls="painel-residuos" aria-selected="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7l3.9-6.7"/><path d="m11 19 3 3M11 19l3-3M11 19h6.2a1.8 1.8 0 0 0 1.6-2.7l-1.2-2"/><path d="m14.2 7.4-1.6-2.6a1.8 1.8 0 0 0-3.1 0L8.4 6.6"/><path d="m7.1 9.6-3.1-.8.8 3.1M14.2 7.4l3.1.8-.8-3.1"/></svg>
+                        Resíduos
+                    </button>
+                    <button class="theme-tabs__tab" type="button" role="tab" id="tab-cooperados" data-tab="cooperados"
+                            aria-controls="painel-cooperados" aria-selected="false" tabindex="-1">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>
+                        Cooperados
+                        <span class="theme-tabs__soon">Em breve</span>
+                    </button>
+                </div>
+            </div>
+
+            <form class="dash-filters" data-filters aria-label="Filtros do dashboard">
+                <div class="segmented dash-filters__presets" role="group" aria-label="Período" data-presets>
+                    <button class="segmented__option" type="button" data-preset="month" aria-pressed="false" title="Do dia 1º do mês atual até hoje">Mês</button>
+                    <button class="segmented__option" type="button" data-preset="3m" aria-pressed="false" title="Últimos 3 meses, incluindo o atual">3M</button>
+                    <button class="segmented__option" type="button" data-preset="12m" aria-pressed="true" title="Últimos 12 meses, incluindo o atual">12M</button>
+                    <button class="segmented__option" type="button" data-preset="year" aria-pressed="false" title="De 1º de janeiro até hoje">Ano</button>
+                    <button class="segmented__option" type="button" data-preset="all" aria-pressed="false" title="Todo o histórico registrado">Tudo</button>
+                </div>
+                <label class="dash-filters__date">
+                    <span class="visually-hidden">Data inicial</span>
+                    <input class="filters__select" type="date" name="from" data-from>
+                </label>
+                <span class="dash-filters__sep" aria-hidden="true">até</span>
+                <label class="dash-filters__date">
+                    <span class="visually-hidden">Data final</span>
+                    <input class="filters__select" type="date" name="to" data-to>
+                </label>
+                <label class="dash-filters__unit">
+                    <span class="visually-hidden">Unidade</span>
+                    <select class="filters__select field__input--select" name="unit" data-unit>
+                        <option value="">Todas as unidades</option>
+                    </select>
+                </label>
+            </form>
+        </header>
+
+        <!-- Tema: Resíduos ----------------------------------------------- -->
+        <section class="dash-panel" id="painel-residuos" role="tabpanel" aria-labelledby="tab-residuos" data-panel="residuos">
+
+            <div class="dash-kpis" data-kpis aria-live="polite"></div>
+
+            <div class="dash-grid" data-grid>
+                <article class="card dash-card dash-card--trend" aria-labelledby="titulo-evolucao">
+                    <header class="dash-card__head">
+                        <div>
+                            <h2 class="dash-card__title" id="titulo-evolucao">Evolução mensal</h2>
+                            <p class="dash-card__subtitle" data-trend-subtitle>Peso gerado por mês, por tipo de resíduo</p>
+                        </div>
+                        <ul class="legend" data-legend aria-label="Legenda"></ul>
+                    </header>
+                    <div class="chart chart--columns" data-chart="trend"></div>
+                </article>
+
+                <article class="card dash-card dash-card--donut" aria-labelledby="titulo-composicao">
+                    <header class="dash-card__head">
+                        <div>
+                            <h2 class="dash-card__title" id="titulo-composicao">Composição por tipo</h2>
+                            <p class="dash-card__subtitle">Participação de cada tipo no total gerado</p>
+                        </div>
+                    </header>
+                    <div class="donut-layout">
+                        <div class="chart chart--donut" data-chart="donut"></div>
+                        <ul class="donut-legend" data-donut-legend></ul>
+                    </div>
+                </article>
+
+                <article class="card dash-card dash-card--detail" aria-labelledby="titulo-detalhe">
+                    <header class="dash-card__head">
+                        <h2 class="dash-card__title" id="titulo-detalhe">Detalhamento</h2>
+                        <div class="segmented segmented--sm" role="tablist" aria-label="Detalhar por" data-detail-tabs>
+                            <button class="segmented__option" type="button" role="tab" data-detail="type" aria-selected="true" aria-pressed="true">Por tipo</button>
+                            <button class="segmented__option" type="button" role="tab" data-detail="unit" aria-selected="false" aria-pressed="false">Por unidade</button>
+                        </div>
+                    </header>
+                    <div class="dash-card__body" data-detail-body></div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Tema: Cooperados (em breve) ---------------------------------- -->
+        <section class="dash-panel dash-panel--soon" id="painel-cooperados" role="tabpanel" aria-labelledby="tab-cooperados" data-panel="cooperados" hidden>
+            <div class="card empty">
+                <span class="empty__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>
+                </span>
+                <p class="empty__title">O painel de Cooperados está a caminho</p>
+                <p class="empty__text">Assim que o módulo de Cooperados for disponibilizado, os indicadores dele aparecerão aqui.</p>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<script type="module" th:src="@{/js/dashboard/dashboard.js}"></script>
+</body>
+</html>

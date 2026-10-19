@@ -6,22 +6,20 @@
    a lista completa; cadastro (POST) e edição (PUT) abrem o modal de formulário.
    ========================================================================== */
 
+import '../shell.js';
 import { api, ApiError } from '../api.js';
 import { ICONS } from '../icons.js';
 import { openFormModal } from '../modal.js';
 import { renderTable } from '../data-table.js';
 import { toast, normalize } from '../ui.js';
+import {
+    kgFormat, percentFormat, intFormat, dateTimeFormat,
+    todayIso, formatDay, weekday, weightParts,
+} from '../format.js';
 
 const ENDPOINT = 'api/waste-records';
 const PAGE_SIZE = 20;
 const DUPLICATE_MESSAGE = 'Já existe um registro para esta unidade, tipo de resíduo e data. Edite o registro existente em vez de lançar outro.';
-
-const kgFormat = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
-const tonFormat = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
-const percentFormat = new Intl.NumberFormat('pt-BR', { style: 'percent', maximumFractionDigits: 1 });
-const intFormat = new Intl.NumberFormat('pt-BR');
-const dateTimeFormat = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-const weekdayFormat = new Intl.DateTimeFormat('pt-BR', { weekday: 'short', timeZone: 'UTC' });
 
 const newButton = document.querySelector('[data-new]');
 const filtersForm = document.querySelector('[data-filters]');
@@ -121,32 +119,7 @@ function isRecyclableType(typeId) {
     return Boolean(type?.isRecyclable ?? type?.recyclable);
 }
 
-/* Datas e números ---------------------------------------------------------- */
-
-function todayIso() {
-    const now = new Date();
-    const pad = (n) => String(n).padStart(2, '0');
-    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-}
-
-// "2026-10-19" -> "19/10/2026", sem passar por fuso horário
-function formatDay(iso) {
-    if (!iso) return '-';
-    const [y, m, d] = iso.split('-');
-    return `${d}/${m}/${y}`;
-}
-
-function weekday(iso) {
-    return iso ? weekdayFormat.format(new Date(`${iso}T00:00:00Z`)).replace('.', '') : '';
-}
-
 const weightOf = (row) => Number(row.weightKg) || 0;
-
-function weightParts(kg) {
-    return kg >= 1000
-        ? { value: tonFormat.format(kg / 1000), unit: 't' }
-        : { value: kgFormat.format(kg), unit: 'kg' };
-}
 
 /* Filtros ------------------------------------------------------------------ */
 
