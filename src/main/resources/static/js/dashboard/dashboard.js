@@ -8,7 +8,7 @@
    "Reciclado" segue waste_types.is_recyclable.
    ========================================================================== */
 
-import '../shell.js';
+import { currentUser, hasRole } from '../shell.js';
 import { api, url } from '../api.js';
 import { ICONS } from '../icons.js';
 import {
@@ -24,7 +24,12 @@ const COLOR_RECYCLED = 'var(--color-chart-3)';
 const COLOR_NOT_RECYCLED = 'var(--color-chart-2)';
 const COLOR_OTHER = 'var(--color-text-faint)';
 
-const THEMES = ['residuos', 'cooperados'];
+// Role mínima para ver cada tema (a aba fica oculta via data-requires-role no HTML)
+const THEME_ROLES = { residuos: 'EMPLOYEE_WASTES', cooperados: 'MANAGER' };
+const THEMES = Object.keys(THEME_ROLES);
+
+// Até o usuário carregar, só Resíduos (todo usuário que chega no /dashboard pode vê-lo)
+let allowedThemes = ['residuos'];
 
 const tabsEl = document.querySelector('[data-theme-tabs]');
 const filtersEl = document.querySelector('[data-filters]');
@@ -221,11 +226,18 @@ function bindFilters() {
 
 function themeFromHash() {
     const id = decodeURIComponent(location.hash.replace(/^#/, ''));
-    return THEMES.includes(id) ? id : null;
+    return allowedThemes.includes(id) ? id : null;
+}
+
+// Libera os temas do perfil; um #tema não permitido na URL cai em Resíduos
+function applyThemeAccess(user) {
+    allowedThemes = THEMES.filter((theme) => hasRole(user, THEME_ROLES[theme]));
+    const theme = themeFromHash() ?? 'residuos';
+    if (theme !== state.theme || (location.hash && location.hash !== `#${theme}`)) selectTheme(theme);
 }
 
 function bindTabs() {
-    const tabs = [...tabsEl.querySelectorAll('[data-tab]')];
+    currentUser.then(applyThemeAccess);
     tabsEl.addEventListener('click', (event) => {
         const tab = event.target.closest('[data-tab]');
         if (tab) selectTheme(tab.dataset.tab);
@@ -234,6 +246,7 @@ function bindTabs() {
     tabsEl.addEventListener('keydown', (event) => {
         if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
         event.preventDefault();
+        const tabs = [...tabsEl.querySelectorAll('[data-tab]:not([hidden])')];
         const current = tabs.findIndex((tab) => tab.dataset.tab === state.theme);
         const next = event.key === 'Home' ? 0
             : event.key === 'End' ? tabs.length - 1
@@ -248,6 +261,7 @@ function bindTabs() {
 }
 
 function selectTheme(theme) {
+    if (!allowedThemes.includes(theme)) return;
     state.theme = theme;
     history.replaceState(null, '', `#${theme}`);
     renderTheme();

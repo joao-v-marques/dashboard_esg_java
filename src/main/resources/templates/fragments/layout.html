@@ -4,6 +4,8 @@
   Só estrutura: os dados do usuário são preenchidos por js/shell.js a partir
   do GET /api/auth/me. Para um novo módulo, adicione o link na sidebar e passe
   o identificador em sidebar('<modulo>') na página.
+  Itens restritos levam data-requires-role="<ROLE>" e hidden: js/shell.js revela
+  para quem tem a role (com a hierarquia do backend); a rota é protegida no SecurityConfig.
 -->
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -106,7 +108,7 @@
                     <span>Início</span>
                 </a>
             </li>
-            <li>
+            <li data-requires-role="EMPLOYEE_WASTES" hidden>
                 <a class="sidebar__link" th:href="@{/dashboard}"
                    th:classappend="${active == 'dashboard'} ? 'is-active'"
                    th:attr="aria-current=${active == 'dashboard'} ? 'page' : null">
@@ -116,10 +118,11 @@
             </li>
         </ul>
 
-        <p class="sidebar__label sidebar__label--section">Módulos</p>
+        <!-- O rótulo "Módulos" só aparece para quem tem ao menos um módulo -->
+        <p class="sidebar__label sidebar__label--section" data-requires-role="EMPLOYEE_WASTES" hidden>Módulos</p>
         <ul class="sidebar__list">
             <!-- Grupo recolhível: vem aberto quando a página ativa pertence a ele (js/shell.js alterna) -->
-            <li class="sidebar__group" th:with="inWastes=${active == 'wastes'}">
+            <li class="sidebar__group" th:with="inWastes=${active == 'wastes'}" data-requires-role="EMPLOYEE_WASTES" hidden>
                 <button class="sidebar__link sidebar__group-toggle" type="button" data-nav-group
                         aria-controls="nav-residuos"
                         th:classappend="${inWastes} ? 'has-active'"
@@ -146,7 +149,7 @@
         </div>
 
         <!-- Só administradores: o link é revelado por js/shell.js e a rota é protegida no SecurityConfig -->
-        <ul class="sidebar__list sidebar__list--bottom" data-admin-only hidden>
+        <ul class="sidebar__list sidebar__list--bottom" data-requires-role="ADMINISTRATOR" hidden>
             <li>
                 <a class="sidebar__link" th:href="@{/settings}"
                    th:classappend="${active == 'settings'} ? 'is-active'"

@@ -11,6 +11,8 @@ import { getTheme, toggleTheme, onThemeChange } from './theme.js';
 // Nomes de exibição das roles do backend. Role nova sem tradução aparece formatada.
 const ROLE_LABELS = {
     ADMINISTRATOR: 'Administrador',
+    MANAGER: 'Gestor',
+    EMPLOYEE_WASTES: 'Colaborador · Resíduos',
     EMPLOYEE: 'Colaborador',
 };
 
@@ -19,8 +21,13 @@ export function roleLabel(role) {
     return ROLE_LABELS[role] ?? role.charAt(0) + role.slice(1).toLowerCase().replace(/_/g, ' ');
 }
 
+// user.roles já vem com a hierarquia aplicada pelo backend (ADMINISTRATOR > MANAGER > EMPLOYEE_WASTES)
+export function hasRole(user, role) {
+    return user?.roles?.includes(role) ?? false;
+}
+
 export function isAdmin(user) {
-    return user?.role === 'ADMINISTRATOR';
+    return hasRole(user, 'ADMINISTRATOR');
 }
 
 export function initials(name) {
@@ -58,8 +65,8 @@ function renderUser(user) {
     setAll('[data-user-sector]', sector);
     setAll('[data-user-meta]', user ? [role, user.sector].filter(Boolean).join(' · ') : '');
 
-    // Só esconde/mostra: quem protege de fato as rotas de administração é o SecurityConfig
-    document.querySelectorAll('[data-admin-only]').forEach((el) => { el.hidden = !isAdmin(user); });
+    // Só esconde/mostra: quem protege de fato as rotas é o SecurityConfig
+    document.querySelectorAll('[data-requires-role]').forEach((el) => { el.hidden = !hasRole(user, el.dataset.requiresRole); });
 }
 
 function setAll(selector, text) {
