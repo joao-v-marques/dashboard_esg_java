@@ -1,8 +1,12 @@
 package com.joao_v_marques.dashboard_esg.shared.config;
 
 import com.joao_v_marques.dashboard_esg.shared.security.*;
+import com.joao_v_marques.dashboard_esg.users.role.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -31,7 +35,15 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/api/auth/login", "/api/auth/logout", "/error", "/css/**", "/js/**", "/img/**").permitAll()
 
                         // Tela e API de administração: só ADMINISTRATOR. O 403 fora de /api/** redireciona para home?erro=sem-acesso
-                        .requestMatchers("/settings", "/api/users/**", "/api/roles/**", "/api/sectors/**").hasRole("ADMINISTRATOR")
+                        .requestMatchers("/settings", "/api/users/**", "/api/roles/**", "/api/sectors/**").hasRole(Role.ADMINISTRATOR)
+
+                        // Unidades são compartilhadas entre módulos: todos leem, só ADMINISTRATOR cadastra/edita
+                        .requestMatchers(HttpMethod.POST, "/api/units/**").hasRole(Role.ADMINISTRATOR)
+                        .requestMatchers(HttpMethod.PUT, "/api/units/**").hasRole(Role.ADMINISTRATOR)
+
+                        // Módulo de resíduos: EMPLOYEE_WASTES e acima (MANAGER, ADMINISTRATOR) pela hierarquia.
+                        // As abas de outros temas do dashboard são escondidas no front; as APIs delas exigirão MANAGER
+                        .requestMatchers("/dashboard", "/wastes", "/api/waste-records/**", "/api/waste-types/**").hasRole(Role.EMPLOYEE_WASTES)
 
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -40,6 +52,16 @@ public class SecurityConfig {
                         .authenticationEntryPoint(restAuthenticationEntryPoint)
                         .accessDeniedHandler(restAccessDeniedHandler))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
+
+    // Quem tem a role da esquerda herda as da direita; o authorizeHttpRequests usa este bean automaticamente.
+    // Novos módulos entram como MANAGER > EMPLOYEE_<MODULO>
+    @Bean
+    static RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+                .role(Role.ADMINISTRATOR).implies(Role.MANAGER)
+                .role(Role.MANAGER).implies(Role.EMPLOYEE_WASTES)
                 .build();
     }
 
