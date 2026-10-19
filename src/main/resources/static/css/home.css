@@ -3,9 +3,7 @@
    "como funciona". Usa os blocos de base.css e app.css.
    ========================================================================== */
 
-/* Cabeçalho --------------------------------------------------------------- */
-.page-head { display: grid; gap: var(--space-2); animation: rise 400ms var(--ease) both; }
-
+/* Cabeçalho (base em app.css) --------------------------------------------- */
 .page-head__date {
   font-size: var(--text-sm);
   font-weight: 500;
@@ -13,15 +11,7 @@
 }
 .page-head__date::first-letter { text-transform: uppercase; }
 
-.page-head__title {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: var(--text-3xl);
-  letter-spacing: -0.02em;
-}
 .page-head__name { color: var(--color-brand-strong); }
-
-.page-head__subtitle { max-width: 40rem; color: var(--color-text-muted); font-size: var(--text-lg); }
 
 /* Apresentação ------------------------------------------------------------ */
 .hero {

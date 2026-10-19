@@ -1,0 +1,72 @@
+<!doctype html>
+<!--
+  Configurações (somente ADMINISTRATOR — protegido em SecurityConfig).
+  À esquerda, as seções de cadastro; à direita, o CRUD da seção ativa.
+  As seções, a tabela e os modais são montados por js/settings/settings.js
+  a partir das definições em js/settings/sections.js.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: appHead('Configurações')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/settings.css}">
+</head>
+
+<body>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header th:replace="~{fragments/layout :: topbar}"></header>
+<aside th:replace="~{fragments/layout :: sidebar('settings')}"></aside>
+<div class="sidebar-scrim" data-sidebar-scrim hidden></div>
+
+<main class="app-main" id="conteudo">
+    <div class="page page--wide">
+
+        <header class="page-head">
+            <p class="page-head__eyebrow">Administração</p>
+            <h1 class="page-head__title">Configurações</h1>
+            <p class="page-head__subtitle">Gerencie os cadastros gerais que sustentam a aplicação.</p>
+        </header>
+
+        <div class="settings">
+            <nav class="card settings-nav" aria-label="Seções de configuração">
+                <p class="settings-nav__label">Cadastros</p>
+                <ul class="settings-nav__list" data-sections-nav></ul>
+            </nav>
+
+            <section class="card settings-panel" aria-labelledby="section-title">
+                <header class="settings-panel__header">
+                    <div class="settings-panel__heading">
+                        <h2 class="settings-panel__title" id="section-title" data-section-title></h2>
+                        <p class="settings-panel__description" data-section-description></p>
+                    </div>
+                    <button class="btn btn--primary" type="button" data-new disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                        <span data-new-label>Novo</span>
+                    </button>
+                </header>
+
+                <div class="settings-panel__toolbar">
+                    <div class="search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                        <input type="search" data-search autocomplete="off" aria-label="Buscar">
+                    </div>
+
+                    <div class="segmented" role="group" aria-label="Filtrar por status" data-status-filter>
+                        <button class="segmented__option" type="button" data-value="active" aria-pressed="true">Ativos</button>
+                        <button class="segmented__option" type="button" data-value="inactive" aria-pressed="false">Inativos</button>
+                        <button class="segmented__option" type="button" data-value="all" aria-pressed="false">Todos</button>
+                    </div>
+
+                    <p class="settings-panel__count" data-results aria-live="polite"></p>
+                </div>
+
+                <div class="settings-panel__table" data-table></div>
+            </section>
+        </div>
+
+    </div>
+</main>
+
+<script type="module" th:src="@{/js/settings/settings.js}"></script>
+</body>
+</html>

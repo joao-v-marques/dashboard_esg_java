@@ -18,6 +18,10 @@ export function roleLabel(role) {
     return ROLE_LABELS[role] ?? role.charAt(0) + role.slice(1).toLowerCase().replace(/_/g, ' ');
 }
 
+export function isAdmin(user) {
+    return user?.role === 'ADMINISTRATOR';
+}
+
 export function initials(name) {
     const parts = (name ?? '').trim().split(/\s+/).filter(Boolean);
     if (!parts.length) return '?';
@@ -50,6 +54,9 @@ function renderUser(user) {
     setAll('[data-user-role]', role);
     setAll('[data-user-sector]', sector);
     setAll('[data-user-meta]', user ? [role, user.sector].filter(Boolean).join(' · ') : '');
+
+    // Só esconde/mostra: quem protege de fato as rotas de administração é o SecurityConfig
+    document.querySelectorAll('[data-admin-only]').forEach((el) => { el.hidden = !isAdmin(user); });
 }
 
 function setAll(selector, text) {
