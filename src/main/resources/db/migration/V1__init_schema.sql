@@ -7,7 +7,10 @@ CREATE TABLE roles (
 
 -- Inserção de todas as roles iniciais da aplicação
 INSERT INTO roles (name)
-VALUES ('ADMINISTRATOR'), ('EMPLOYEE');
+VALUES
+    ('ADMINISTRATOR'),
+    ('EMPLOYEE_WASTES'),
+    ('MANAGER');
 
 -- Tabela de setores, usada principalmente para usuários
 CREATE TABLE sectors (
