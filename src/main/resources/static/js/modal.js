@@ -159,6 +159,12 @@ function buildField(field, value) {
         input.value = value !== undefined && value !== null && input.querySelector(`option[value="${CSS.escape(String(value))}"]`)
             ? String(value)
             : '';
+    } else if (field.type === 'textarea') {
+        input = el('textarea', 'field__input field__input--plain field__input--textarea');
+        input.value = value ?? '';
+        input.rows = field.rows ?? 3;
+        if (field.placeholder) input.placeholder = field.placeholder;
+        if (field.maxLength) input.maxLength = field.maxLength;
     } else {
         input = el('input', 'field__input field__input--plain');
         input.type = field.type ?? 'text';
@@ -167,6 +173,11 @@ function buildField(field, value) {
         if (field.maxLength) input.maxLength = field.maxLength;
         if (field.autocomplete) input.autocomplete = field.autocomplete;
         if (field.type === 'text' || !field.type) input.spellcheck = false;
+        // number/date: limites nativos (o teclado numérico e o seletor de data respeitam)
+        if (field.min !== undefined) input.min = String(field.min);
+        if (field.max !== undefined) input.max = String(field.max);
+        if (field.step !== undefined) input.step = String(field.step);
+        if (field.type === 'number') input.inputMode = 'decimal';
     }
 
     input.id = id;
@@ -176,6 +187,14 @@ function buildField(field, value) {
     const errorId = `${id}-error`;
     input.setAttribute('aria-describedby', errorId);
     control.append(input);
+
+    // Unidade fixa à direita do campo (ex.: "kg")
+    if (field.suffix) {
+        input.classList.add('field__input--with-suffix');
+        const suffix = el('span', 'field__suffix', field.suffix);
+        suffix.setAttribute('aria-hidden', 'true');
+        control.append(suffix);
+    }
 
     if (field.type === 'password') {
         input.classList.add('field__input--with-action');
@@ -207,8 +226,11 @@ function buildField(field, value) {
 function readValue(form, field) {
     const raw = form.elements[field.name].value;
     const value = field.type === 'password' ? raw : raw.trim();
-    if (value === '') return null;
-    if (field.valueType === 'number') return Number(value);
+    if (value === '') {
+        // Um number com texto inválido chega vazio em .value: marca para a validação não tratar como "não preenchido"
+        return field.type === 'number' && form.elements[field.name].validity.badInput ? NaN : null;
+    }
+    if (field.valueType === 'number' || field.type === 'number') return Number(value);
     return value;
 }
 
@@ -217,6 +239,16 @@ function validateField(field, value) {
         return field.type === 'select' ? 'Selecione uma opção.' : 'Preencha este campo.';
     }
     if (value === null) return null;
+    if (field.type === 'number') {
+        if (Number.isNaN(value)) return 'Informe um número válido.';
+        if (field.min !== undefined && value < field.min) return `Informe um valor maior ou igual a ${field.min}.`;
+        if (field.max !== undefined && value > field.max) return `Informe um valor menor ou igual a ${field.max}.`;
+    }
+    // Datas ISO (aaaa-mm-dd) comparam corretamente como texto
+    if (field.type === 'date') {
+        if (field.max && value > field.max) return field.maxMessage ?? 'Informe uma data até hoje.';
+        if (field.min && value < field.min) return 'Informe uma data válida.';
+    }
     if (field.minLength && String(value).length < field.minLength) {
         return `Informe pelo menos ${field.minLength} caracteres.`;
     }
@@ -248,7 +280,7 @@ export function openFormModal({
 
     return present(shell, ({ finish, setBusy: setModalBusy }) => {
         cancel.addEventListener('click', () => finish(false));
-        form.querySelector('input, select')?.focus();
+        form.querySelector('input, select, textarea')?.focus();
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -288,7 +320,7 @@ export function openFormModal({
                 const unmatched = fieldErrors.filter(([name, message]) => !setFieldError(form, name, message));
                 if (unmatched.length) showAlert(alert, unmatched.map(([, text]) => text).join(' '));
                 else if (!fieldErrors.length) showAlert(alert, error.message);
-                form.querySelector('.is-invalid input, .is-invalid select')?.focus();
+                form.querySelector('.is-invalid input, .is-invalid select, .is-invalid textarea')?.focus();
             }
         });
     });

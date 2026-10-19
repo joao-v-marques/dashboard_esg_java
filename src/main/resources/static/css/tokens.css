@@ -2,7 +2,8 @@
    tokens.css
    Única fonte de verdade de cor, tipografia, espaçamento, raio e sombra.
    Camada 1 (--palette-*) são valores brutos; camada 2 (--color-*) são papéis
-   semânticos, que é o que o resto do CSS consome. Por enquanto só tema claro.
+   semânticos, que é o que o resto do CSS consome. O tema escuro só redefine a
+   camada 2 em :root[data-theme="dark"] (atributo aplicado por js/theme-init.js).
    ========================================================================== */
 
 :root {
@@ -77,6 +78,31 @@
   --color-focus:           rgba(0, 153, 93, 0.35);
   --color-danger-focus:    rgba(179, 38, 30, 0.18);
 
+  /* Fundos sólidos com texto branco por cima (botões, ícone ativo) */
+  --color-brand-fill:       var(--palette-green-600);
+  --color-brand-fill-hover: var(--palette-green-700);
+  --color-danger-fill:      var(--palette-red-700);
+  --color-danger-hover:     #8f1e18;
+  --color-danger-ring:      #fef7f6;
+
+  --color-border-strong:   var(--palette-neutral-400);
+  --color-brand-border:    var(--palette-green-200);
+  --color-muted-bg:        var(--palette-neutral-100);
+  --color-skeleton:        var(--palette-neutral-100);
+  --color-skeleton-shine:  var(--palette-neutral-50);
+  --color-topbar-bg:       rgba(255, 255, 255, 0.92);
+  --color-scrim:           rgba(20, 37, 29, 0.4);
+  --color-backdrop:        rgba(20, 37, 29, 0.45);
+
+  /* Ilustração da home */
+  --color-art-1:           var(--palette-green-50);
+  --color-art-2:           var(--palette-green-100);
+  --color-art-3:           var(--palette-green-200);
+  --color-art-4:           #7fc4a0;
+  --color-art-line:        var(--palette-neutral-200);
+  --color-art-lime-soft:   var(--palette-lime-100);
+  --color-art-dot:         var(--palette-neutral-0);
+
   /* Tipografia ------------------------------------------------------------- */
   --font-display: "Fraunces", Georgia, "Times New Roman", serif;
   --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -117,4 +143,72 @@
 
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --duration: 180ms;
+}
+
+/* Tema escuro ------------------------------------------------------------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg:              #0f1110;
+  --color-surface:         #171918;
+  --color-surface-subtle:  #1d201f;
+  --color-surface-tint:    #1f2a24;
+  --color-border:          #2c302e;
+  --color-border-subtle:   #232625;
+
+  --color-text:            #e8ecea;
+  --color-text-secondary:  #c3cbc6;
+  --color-text-muted:      #949e98;
+  --color-text-faint:      #6f7873;
+  --color-text-on-brand:   #ffffff;
+
+  --color-brand:           #1fb873;
+  --color-brand-strong:    #3cc788;
+  --color-brand-stronger:  #6fd8a6;
+  --color-brand-soft:      #1d3a2c;
+  --color-brand-deep:      #0b3432;
+  --color-brand-deeper:    #0c2423;
+  --color-accent:          var(--palette-lime-400);
+
+  --color-pillar-e:        #4fcb8f;
+  --color-pillar-e-bg:     rgba(0, 153, 93, 0.16);
+  --color-pillar-s:        #74b9d2;
+  --color-pillar-s-bg:     rgba(55, 140, 170, 0.18);
+  --color-pillar-g:        #bcd96a;
+  --color-pillar-g-bg:     rgba(177, 211, 75, 0.14);
+
+  --color-danger:          #ff8a80;
+  --color-danger-bg:       rgba(179, 38, 30, 0.18);
+  --color-danger-border:   rgba(255, 138, 128, 0.35);
+
+  --color-focus:           rgba(60, 199, 136, 0.45);
+  --color-danger-focus:    rgba(255, 138, 128, 0.25);
+
+  --color-brand-fill:       #00875a;
+  --color-brand-fill-hover: #009966;
+  --color-danger-fill:      #c4372e;
+  --color-danger-hover:     #d84a40;
+  --color-danger-ring:      rgba(179, 38, 30, 0.08);
+
+  --color-border-strong:   #4a504d;
+  --color-brand-border:    #2b4d3b;
+  --color-muted-bg:        #262a28;
+  --color-skeleton:        #222524;
+  --color-skeleton-shine:  #2c302e;
+  --color-topbar-bg:       rgba(23, 25, 24, 0.92);
+  --color-scrim:           rgba(0, 0, 0, 0.55);
+  --color-backdrop:        rgba(0, 0, 0, 0.6);
+
+  --color-art-1:           #1a2620;
+  --color-art-2:           #1f3a2c;
+  --color-art-3:           #2a5a41;
+  --color-art-4:           #3f8f66;
+  --color-art-line:        #2c302e;
+  --color-art-lime-soft:   #2a3318;
+  --color-art-dot:         #171918;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px -8px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 24px 48px -16px rgba(0, 0, 0, 0.7);
 }

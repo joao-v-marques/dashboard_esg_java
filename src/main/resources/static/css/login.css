@@ -167,7 +167,7 @@
 .field__hint {
   font-size: var(--text-xs);
   font-weight: 500;
-  color: var(--palette-lime-700);
+  color: var(--color-pillar-g);
 }
 
 .login__help {

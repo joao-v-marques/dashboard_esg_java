@@ -1,0 +1,135 @@
+<!doctype html>
+<!--
+  Resíduos › Controlar Resíduos.
+  Indicadores no topo e a lista de registros com filtros; cadastro e edição em modal.
+  Tudo é montado por js/wastes/wastes.js a partir de GET /api/waste-records,
+  /api/units e /api/waste-types.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: appHead('Controlar Resíduos')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/wastes.css}">
+</head>
+
+<body>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header th:replace="~{fragments/layout :: topbar}"></header>
+<aside th:replace="~{fragments/layout :: sidebar('wastes')}"></aside>
+<div class="sidebar-scrim" data-sidebar-scrim hidden></div>
+
+<main class="app-main" id="conteudo">
+    <div class="page page--wide">
+
+        <header class="page-head wastes-head">
+            <div class="wastes-head__text">
+                <p class="page-head__eyebrow">Ambiental · Resíduos</p>
+                <h1 class="page-head__title">Controlar Resíduos</h1>
+                <p class="page-head__subtitle">Registre a pesagem diária de resíduos por unidade e acompanhe o volume gerado.</p>
+            </div>
+            <button class="btn btn--primary wastes-head__action" type="button" data-new disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                <span>Novo registro</span>
+            </button>
+        </header>
+
+        <!-- Indicadores: refletem os filtros aplicados -->
+        <section class="kpis" aria-label="Indicadores do período filtrado" data-kpis>
+            <article class="card kpi">
+                <span class="kpi__icon" data-kpi-icon="scale"></span>
+                <p class="kpi__label">Peso total</p>
+                <p class="kpi__value" data-kpi="total"><span class="skeleton skeleton--line" style="width: 96px"></span></p>
+                <p class="kpi__hint" data-kpi-hint="total"></p>
+            </article>
+            <article class="card kpi">
+                <span class="kpi__icon" data-kpi-icon="list"></span>
+                <p class="kpi__label">Registros</p>
+                <p class="kpi__value" data-kpi="count"><span class="skeleton skeleton--line" style="width: 48px"></span></p>
+                <p class="kpi__hint" data-kpi-hint="count"></p>
+            </article>
+            <article class="card kpi kpi--recycle">
+                <span class="kpi__icon" data-kpi-icon="recycle"></span>
+                <p class="kpi__label">Reciclável</p>
+                <p class="kpi__value" data-kpi="recyclable"><span class="skeleton skeleton--line" style="width: 64px"></span></p>
+                <div class="meter" role="img" data-kpi-meter aria-label="Proporção reciclável">
+                    <span class="meter__fill" data-kpi-meter-fill></span>
+                </div>
+                <p class="kpi__hint" data-kpi-hint="recyclable"></p>
+            </article>
+            <article class="card kpi">
+                <span class="kpi__icon" data-kpi-icon="building"></span>
+                <p class="kpi__label">Maior geradora</p>
+                <p class="kpi__value kpi__value--text" data-kpi="topUnit"><span class="skeleton skeleton--line" style="width: 120px"></span></p>
+                <p class="kpi__hint" data-kpi-hint="topUnit"></p>
+            </article>
+        </section>
+
+        <section class="card wastes-panel" aria-labelledby="registros-title">
+            <header class="wastes-panel__header">
+                <div>
+                    <h2 class="wastes-panel__title" id="registros-title">Registros</h2>
+                    <p class="wastes-panel__description">Histórico de pesagens. Use os filtros para analisar um período, unidade ou tipo.</p>
+                </div>
+                <button class="btn btn--secondary btn--sm wastes-panel__filters-toggle" type="button"
+                        data-filters-toggle aria-expanded="false" aria-controls="wastes-filters">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3H2l8 9.5V19l4 2v-8.5Z"/></svg>
+                    <span data-filters-toggle-label>Filtros</span>
+                </button>
+            </header>
+
+            <form class="filters" id="wastes-filters" data-filters role="search" aria-label="Filtrar registros">
+                <div class="filters__field filters__field--search">
+                    <label class="filters__label" for="filter-search">Buscar</label>
+                    <div class="search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                        <input type="search" id="filter-search" name="search" autocomplete="off" placeholder="Unidade, tipo, observação ou usuário">
+                    </div>
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-unit">Unidade</label>
+                    <select class="filters__select field__input--select" id="filter-unit" name="unit">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-type">Tipo de resíduo</label>
+                    <select class="filters__select field__input--select" id="filter-type" name="type">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-from">De</label>
+                    <input class="filters__select" type="date" id="filter-from" name="from">
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-to">Até</label>
+                    <input class="filters__select" type="date" id="filter-to" name="to">
+                </div>
+                <div class="filters__actions">
+                    <button class="btn btn--secondary btn--sm" type="reset" data-filters-clear disabled>Limpar filtros</button>
+                </div>
+            </form>
+
+            <div class="wastes-panel__bar">
+                <p class="wastes-panel__count" data-results aria-live="polite"></p>
+            </div>
+
+            <div class="wastes-panel__table" data-table></div>
+
+            <nav class="pager" aria-label="Paginação dos registros" data-pager hidden>
+                <button class="icon-btn" type="button" data-page="prev" aria-label="Página anterior">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <span class="pager__status" data-page-status></span>
+                <button class="icon-btn" type="button" data-page="next" aria-label="Próxima página">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+            </nav>
+        </section>
+
+    </div>
+</main>
+
+<script type="module" th:src="@{/js/wastes/wastes.js}"></script>
+</body>
+</html>

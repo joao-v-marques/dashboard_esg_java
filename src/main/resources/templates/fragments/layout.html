@@ -10,7 +10,7 @@
     <th:block th:fragment="appHead(title)">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="color-scheme" content="light">
+        <meta name="color-scheme" content="light dark">
         <meta name="app-base" th:content="@{/}">
         <title th:text="${title} + ' · Acompanhamento ESG'">Acompanhamento ESG</title>
 
@@ -20,6 +20,7 @@
         <link rel="stylesheet"
               href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
 
+        <script th:src="@{/js/theme-init.js}"></script>
         <link rel="stylesheet" th:href="@{/css/tokens.css}">
         <link rel="stylesheet" th:href="@{/css/base.css}">
         <link rel="stylesheet" th:href="@{/css/app.css}">
@@ -73,6 +74,15 @@
                 </div>
             </dl>
 
+            <button class="user-menu__item" type="button" role="menuitemcheckbox" aria-checked="false" data-theme-toggle>
+                <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                <span data-theme-toggle-label>Modo escuro</span>
+                <span class="theme-switch" aria-hidden="true"></span>
+            </button>
+
+            <hr class="user-menu__separator">
+
             <button class="user-menu__item user-menu__item--danger" type="button" role="menuitem" data-logout>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
                 <span data-logout-label>Sair da conta</span>
@@ -97,12 +107,34 @@
                 </a>
             </li>
         </ul>
+
+        <p class="sidebar__label sidebar__label--section">Módulos</p>
+        <ul class="sidebar__list">
+            <!-- Grupo recolhível: vem aberto quando a página ativa pertence a ele (js/shell.js alterna) -->
+            <li class="sidebar__group" th:with="inWastes=${active == 'wastes'}">
+                <button class="sidebar__link sidebar__group-toggle" type="button" data-nav-group
+                        aria-controls="nav-residuos"
+                        th:classappend="${inWastes} ? 'has-active'"
+                        th:attr="aria-expanded=${inWastes} ? 'true' : 'false'">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7l3.9-6.7"/><path d="m11 19 3 3M11 19l3-3M11 19h6.2a1.8 1.8 0 0 0 1.6-2.7l-1.2-2"/><path d="m14.2 7.4-1.6-2.6a1.8 1.8 0 0 0-3.1 0L8.4 6.6"/><path d="m7.1 9.6-3.1-.8.8 3.1M14.2 7.4l3.1.8-.8-3.1"/></svg>
+                    <span>Resíduos</span>
+                    <svg class="sidebar__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <ul class="sidebar__sublist" id="nav-residuos" th:attr="hidden=${inWastes} ? null : 'hidden'">
+                    <li>
+                        <a class="sidebar__sublink" th:href="@{/wastes}"
+                           th:classappend="${inWastes} ? 'is-active'"
+                           th:attr="aria-current=${inWastes} ? 'page' : null">Controlar Resíduos</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
     </nav>
 
     <div class="sidebar__footer">
         <div class="sidebar__note">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10Z"/><path d="M2 21c0-3 1.9-5.4 5.1-6"/></svg>
-            <p>Novos módulos aparecerão aqui conforme forem disponibilizados.</p>
+            <p>Outros módulos ESG aparecerão aqui conforme forem disponibilizados.</p>
         </div>
 
         <!-- Só administradores: o link é revelado por js/shell.js e a rota é protegida no SecurityConfig -->

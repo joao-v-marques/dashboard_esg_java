@@ -3,9 +3,11 @@
 
    renderTable(container, {
      state: 'loading' | 'error' | 'ready',
-     columns: [{ label, render(row) -> string | Node, className }],
+     columns: [{ label, render(row) -> string | Node, className, sortKey }],
      rows, rowClass(row), actions(row) -> [{ icon, label, onClick, tone, disabledReason }],
      empty: { title, text }, errorText, onRetry,
+     sort: { key, dir: 'asc' | 'desc' }, onSort(key),   // opcionais: cabeçalhos com sortKey viram botões
+     stack: true,                                       // opcional: no celular cada linha vira um card
    })
    Strings retornadas por render entram via textContent (seguro para dados da API).
    ========================================================================== */
@@ -46,7 +48,7 @@ function actionButton(action) {
 }
 
 export function renderTable(container, options) {
-    const { state, columns, rows = [], rowClass, actions, empty, errorText, onRetry } = options;
+    const { state, columns, rows = [], rowClass, actions, empty, errorText, onRetry, sort, onSort, stack } = options;
     container.replaceChildren();
 
     if (state === 'error') {
@@ -68,12 +70,26 @@ export function renderTable(container, options) {
     }
 
     const wrap = el('div', 'table-wrap');
-    const table = el('table', 'table');
+    const table = el('table', `table${stack ? ' table--stack' : ''}`);
     const thead = el('thead');
     const headRow = el('tr');
     columns.forEach((column) => {
-        const th = el('th', column.className, column.label);
+        const th = el('th', column.className);
         th.scope = 'col';
+        if (column.sortKey && onSort) {
+            const active = sort?.key === column.sortKey;
+            th.setAttribute('aria-sort', active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none');
+            const button = el('button', `th-sort${active ? ' is-active' : ''}`);
+            button.type = 'button';
+            button.append(el('span', null, column.label));
+            const icon = el('span', 'th-sort__icon');
+            icon.innerHTML = active ? ICONS[sort.dir === 'asc' ? 'sortUp' : 'sortDown'] : ICONS.sort;
+            button.append(icon);
+            button.addEventListener('click', () => onSort(column.sortKey));
+            th.append(button);
+        } else {
+            th.textContent = column.label;
+        }
         headRow.append(th);
     });
     if (actions) {
@@ -103,6 +119,7 @@ export function renderTable(container, options) {
             const tr = el('tr', rowClass?.(row) ?? '');
             columns.forEach((column) => {
                 const td = el('td', column.className);
+                td.dataset.label = column.label;
                 const content = column.render(row);
                 if (content instanceof Node) td.append(content);
                 else td.textContent = content ?? '-';

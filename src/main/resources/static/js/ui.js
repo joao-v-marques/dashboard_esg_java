@@ -60,6 +60,14 @@ export function clearErrorOnInput(scope) {
     scope.addEventListener('change', handler);
 }
 
+// Busca sem diferenciar acentos e maiúsculas ("joao" encontra "João")
+export function normalize(text) {
+    return String(text ?? '')
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase();
+}
+
 // Remove um parâmetro da URL sem recarregar (evita repetir a mensagem ao atualizar a página)
 export function consumeQueryParam(name) {
     const params = new URLSearchParams(window.location.search);

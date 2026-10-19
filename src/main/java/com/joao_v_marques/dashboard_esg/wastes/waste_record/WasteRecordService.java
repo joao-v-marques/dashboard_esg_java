@@ -96,7 +96,9 @@ public class WasteRecordService {
         return new WasteRecordResponse(
                 wasteRecord.getId(),
                 wasteRecord.getRecordDate(),
+                wasteRecord.getUnit().getId(),
                 wasteRecord.getUnit().getName(),
+                wasteRecord.getWasteType().getId(),
                 wasteRecord.getWasteType().getName(),
                 wasteRecord.getWeightKg(),
                 wasteRecord.getObservations(),

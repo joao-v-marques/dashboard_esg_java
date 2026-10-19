@@ -11,7 +11,7 @@ import { ICONS } from '../icons.js';
 import { openFormModal, confirmModal } from '../modal.js';
 import { renderTable } from '../data-table.js';
 import { currentUser } from '../shell.js';
-import { toast } from '../ui.js';
+import { toast, normalize } from '../ui.js';
 import { SECTIONS } from './sections.js';
 
 const nav = document.querySelector('[data-sections-nav]');
@@ -158,14 +158,6 @@ function renderNav() {
         count.hidden = entry.status !== 'ready';
         count.title = `Cadastros ativos: ${activeCount}`;
     });
-}
-
-// Busca sem diferenciar acentos e maiúsculas ("joao" encontra "João")
-function normalize(text) {
-    return String(text ?? '')
-        .normalize('NFD')
-        .replace(/[̀-ͯ]/g, '')
-        .toLowerCase();
 }
 
 function visibleRows(section, rows) {

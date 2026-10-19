@@ -7,7 +7,9 @@ import java.time.OffsetDateTime;
 public record WasteRecordResponse(
         Integer id,
         LocalDate recordDate,
+        Integer unitId,
         String unitName,
+        Integer wasteTypeId,
         String wasteTypeName,
         BigDecimal weightKg,
         String observations,
