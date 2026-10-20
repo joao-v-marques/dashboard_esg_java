@@ -14,6 +14,7 @@ import com.joao_v_marques.dashboard_esg.users.user.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -77,6 +78,50 @@ public class NipService {
         nip.setInsertedBy(insertedBy);
 
         nipRepository.save(nip);
+
+        return toResponse(nip);
+    }
+
+    @Transactional
+    public NipResponse update(Integer nipId, NipRequest request, UserPrincipal currentUser) {
+        String nipNumber = request.nipNumber().trim();
+        String protocolCode = request.protocolCode().trim();
+        String description = request.description() != null ? request.description().trim() : null;
+        String responseDescription = request.responseDescription() != null ? request.responseDescription().trim() : null;
+
+        // Confirmar se a NIP editada realmente existe
+        Nip nip = nipRepository.findById(nipId)
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrada nenhuma NIP com o ID informado."));
+
+        // Validações de duplicidade, ignorando a própria NIP
+        if (nipRepository.existsByNipNumberAndIdNot(nipNumber, nipId)) {
+            throw new ConflictException("Já existe outra NIP cadastrada com este número.");
+        }
+        if (nipRepository.existsByProtocolCodeAndIdNot(protocolCode, nipId)) {
+            throw new ConflictException("Já existe outra NIP cadastrada com este protocolo.");
+        }
+
+        // Validação das FK
+        NipStatus status = nipStatusRepository.findById(request.statusId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum status de NIP com o ID informado."));
+        NipNature nature = nipNatureRepository.findById(request.natureId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrada nenhuma natureza de NIP com o ID informado."));
+        User updatedBy = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado usuário com o ID informado."));
+
+        // Atualizar a entidade já existente
+        nip.setNipNumber(nipNumber);
+        nip.setNotificationDate(request.notificationDate());
+        nip.setDemandCode(request.demandCode().trim());
+        nip.setProtocolCode(protocolCode);
+        nip.setBeneficiaryName(request.beneficiaryName().trim());
+        nip.setBeneficiaryCpf(request.beneficiaryCpf());
+        nip.setDescription(description);
+        nip.setResponseDescription(responseDescription);
+        nip.setStatus(status);
+        nip.setNature(nature);
+        nip.setUpdatedAt(OffsetDateTime.now());
+        nip.setUpdatedBy(updatedBy);
 
         return toResponse(nip);
     }

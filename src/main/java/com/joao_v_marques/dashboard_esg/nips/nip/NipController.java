@@ -41,4 +41,12 @@ public class NipController {
 
         return ResponseEntity.created(location).body(created);
     }
+
+    // PUT de uma NIP já existente
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<NipResponse> update(@PathVariable Integer id, @Valid @RequestBody NipRequest request, @AuthenticationPrincipal UserPrincipal currentUser) {
+        NipResponse updated = nipService.update(id, request, currentUser);
+
+        return ResponseEntity.ok(updated);
+    }
 }
