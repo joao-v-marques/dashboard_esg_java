@@ -1,10 +1,14 @@
 package com.joao_v_marques.dashboard_esg.nip;
 
+import com.joao_v_marques.dashboard_esg.nip.dto.NipNatureRequest;
 import com.joao_v_marques.dashboard_esg.nip.dto.NipNatureResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -20,5 +24,26 @@ public class NipNatureController {
     @GetMapping
     public List<NipNatureResponse> findAll() {
         return nipNatureService.findAll();
+    }
+
+    // POST de uma nova natureza de NIP no sistema
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<NipNatureResponse> create(@Valid @RequestBody NipNatureRequest request) {
+        NipNatureResponse created = nipNatureService.create(request);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(created.id())
+                .toUri();
+
+        return ResponseEntity.created(location).body(created);
+    }
+
+    // PUT de uma natureza de NIP já existente
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<NipNatureResponse> update(@PathVariable Integer id, @Valid @RequestBody NipNatureRequest request) {
+        NipNatureResponse updated = nipNatureService.update(id, request);
+
+        return ResponseEntity.ok(updated);
     }
 }
