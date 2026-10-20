@@ -1,10 +1,16 @@
 package com.joao_v_marques.dashboard_esg.nips.nip;
 
+import com.joao_v_marques.dashboard_esg.nips.nip.dto.NipRequest;
 import com.joao_v_marques.dashboard_esg.nips.nip.dto.NipResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.joao_v_marques.dashboard_esg.shared.security.UserPrincipal;
+import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -21,5 +27,18 @@ public class NipController {
     @GetMapping
     public List<NipResponse> findAll() {
         return nipService.findAll();
+    }
+
+    // POST de uma nova NIP no sistema
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<NipResponse> create(@Valid @RequestBody NipRequest request, @AuthenticationPrincipal UserPrincipal currentUser) {
+        NipResponse created = nipService.create(request, currentUser);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(created.id())
+                .toUri();
+
+        return ResponseEntity.created(location).body(created);
     }
 }
