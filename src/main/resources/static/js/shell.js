@@ -4,8 +4,9 @@
    logout e a sidebar no mobile. As páginas importam `currentUser` para usar os dados.
    ========================================================================== */
 
-import { auth, url } from './api.js';
+import { auth, url, ApiError } from './api.js';
 import { toast, consumeQueryParam } from './ui.js';
+import { openFormModal } from './modal.js';
 import { getTheme, toggleTheme, onThemeChange } from './theme.js';
 
 // Nomes de exibição das roles do backend. Role nova sem tradução aparece formatada.
@@ -79,6 +80,7 @@ function setupUserMenu() {
     const trigger = menu.querySelector('[data-user-menu-trigger]');
     const dropdown = menu.querySelector('[data-user-menu-dropdown]');
     const logoutButton = menu.querySelector('[data-logout]');
+    const changePasswordButton = menu.querySelector('[data-change-password]');
     const firstItem = menu.querySelector('[role^="menuitem"]');
 
     const open = () => {
@@ -113,6 +115,11 @@ function setupUserMenu() {
         if (event.relatedTarget && !menu.contains(event.relatedTarget)) close();
     });
 
+    changePasswordButton?.addEventListener('click', () => {
+        close();
+        changePassword();
+    });
+
     logoutButton.addEventListener('click', async () => {
         const label = logoutButton.querySelector('[data-logout-label]');
         logoutButton.disabled = true;
@@ -124,6 +131,43 @@ function setupUserMenu() {
             logoutButton.disabled = false;
             label.textContent = 'Sair da conta';
             toast(error.message, { type: 'danger' });
+        }
+    });
+}
+
+// Troca da própria senha (PATCH /api/auth/me/password); a confirmação só é conferida aqui
+function changePassword() {
+    const passwordField = { type: 'password', required: true, full: true };
+    return openFormModal({
+        title: 'Trocar senha',
+        description: 'Informe sua senha atual e defina uma nova.',
+        iconName: 'key',
+        size: 'sm',
+        submitLabel: 'Trocar senha',
+        busyLabel: 'Salvando...',
+        fields: [
+            { ...passwordField, name: 'currentPassword', label: 'Senha atual', autocomplete: 'current-password' },
+            { ...passwordField, name: 'newPassword', label: 'Nova senha', minLength: 4, maxLength: 72, autocomplete: 'new-password' },
+            {
+                ...passwordField, name: 'confirmPassword', label: 'Confirmar nova senha', minLength: 4, maxLength: 72,
+                autocomplete: 'new-password', help: 'A senha deve conter entre 4 e 72 caracteres.',
+            },
+        ],
+        onSubmit: async (data) => {
+            // Mesmo caminho dos erros da API: a mensagem vai para baixo do campo e o modal continua aberto
+            if (data.newPassword !== data.confirmPassword) {
+                throw new ApiError(400, 'As senhas não conferem.', { confirmPassword: 'As senhas não conferem.' });
+            }
+            await auth.changePassword(data.currentPassword, data.newPassword);
+        },
+    }).then(async (saved) => {
+        if (!saved) return;
+        // Encerra a sessão para o usuário entrar de novo já com a nova senha
+        try {
+            await auth.logout();
+            window.location.assign(url('login?senha-alterada'));
+        } catch (error) {
+            toast(`Senha alterada, mas não foi possível encerrar a sessão. ${error.message}`, { type: 'danger' });
         }
     });
 }

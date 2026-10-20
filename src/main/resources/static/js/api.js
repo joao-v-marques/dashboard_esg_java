@@ -86,5 +86,7 @@ export const auth = {
     login: (username, password) =>
         request('api/auth/login', { method: 'POST', body: { username, password }, redirectOnUnauthorized: false }),
     me: (options) => request('api/auth/me', options),
+    changePassword: (currentPassword, newPassword) =>
+        request('api/auth/me/password', { method: 'PATCH', body: { currentPassword, newPassword } }),
     logout: () => request('api/auth/logout', { method: 'POST', redirectOnUnauthorized: false }),
 };

@@ -11,6 +11,7 @@ const REASONS = {
     'sessao-expirada': { type: 'error', text: 'Sua sessão expirou. Entre novamente para continuar.' },
     'login-necessario': { type: 'info', text: 'Entre com sua conta para acessar a aplicação.' },
     'saiu': { type: 'info', text: 'Você saiu da sua conta com segurança.' },
+    'senha-alterada': { type: 'info', text: 'Senha alterada com sucesso. Entre novamente com a nova senha.' },
 };
 
 const form = document.querySelector('[data-login-form]');
@@ -97,7 +98,8 @@ function hideAlert() {
 }
 
 function showReasonFromUrl() {
-    const reason = consumeQueryParam('erro') ?? (consumeQueryParam('saiu') !== null ? 'saiu' : null);
+    const flag = ['saiu', 'senha-alterada'].find((name) => consumeQueryParam(name) !== null);
+    const reason = consumeQueryParam('erro') ?? flag ?? null;
     const message = REASONS[reason];
     if (message) showAlert(message.text, message.type);
 }
