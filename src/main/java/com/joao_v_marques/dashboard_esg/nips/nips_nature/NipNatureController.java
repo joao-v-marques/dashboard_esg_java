@@ -1,7 +1,7 @@
-package com.joao_v_marques.dashboard_esg.nip;
+package com.joao_v_marques.dashboard_esg.nips.nips_nature;
 
-import com.joao_v_marques.dashboard_esg.nip.dto.NipNatureRequest;
-import com.joao_v_marques.dashboard_esg.nip.dto.NipNatureResponse;
+import com.joao_v_marques.dashboard_esg.nips.nips_nature.dto.NipNatureRequest;
+import com.joao_v_marques.dashboard_esg.nips.nips_nature.dto.NipNatureResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

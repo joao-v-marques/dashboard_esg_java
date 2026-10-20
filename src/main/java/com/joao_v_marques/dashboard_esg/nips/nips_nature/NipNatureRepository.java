@@ -1,4 +1,4 @@
-package com.joao_v_marques.dashboard_esg.nip;
+package com.joao_v_marques.dashboard_esg.nips.nips_nature;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

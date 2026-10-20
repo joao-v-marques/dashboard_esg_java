@@ -1,4 +1,4 @@
-package com.joao_v_marques.dashboard_esg.nip.dto;
+package com.joao_v_marques.dashboard_esg.nips.nips_nature.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
