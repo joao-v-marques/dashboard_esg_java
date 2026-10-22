@@ -2,8 +2,10 @@
 <!--
   Dashboard. No topo, as abas de tema (Resíduos, Cooperados...) e os filtros;
   abaixo, o painel do tema ativo. No desktop tudo cabe em uma tela.
-  Os dados são agregados por js/dashboard/dashboard.js a partir de
+  Resíduos: agregado por js/dashboard/dashboard.js a partir de
   GET /api/waste-records, /api/waste-types e /api/units.
+  Cooperados: js/dashboard/cooperados.js, a partir de
+  GET /api/cooperative-members/dashboard (dados do certificados-cooperados).
 -->
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -36,7 +38,6 @@
                             data-requires-role="MANAGER" hidden>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>
                         Cooperados
-                        <span class="theme-tabs__soon">Em breve</span>
                     </button>
                 </div>
             </div>
@@ -63,6 +64,14 @@
                     <select class="filters__select field__input--select" name="unit" data-unit>
                         <option value="">Todas as unidades</option>
                     </select>
+                </label>
+            </form>
+
+            <!-- Cooperados filtra por ano-base (é como o certificados-cooperados agrega), não por intervalo de datas -->
+            <form class="dash-filters" data-coop-filters aria-label="Filtros de Cooperados" hidden>
+                <label class="dash-filters__year">
+                    <span class="dash-filters__sep">Ano-base</span>
+                    <select class="filters__select field__input--select" name="year" data-coop-year></select>
                 </label>
             </form>
         </header>
@@ -110,14 +119,31 @@
             </div>
         </section>
 
-        <!-- Tema: Cooperados (em breve) ---------------------------------- -->
-        <section class="dash-panel dash-panel--soon" id="painel-cooperados" role="tabpanel" aria-labelledby="tab-cooperados" data-panel="cooperados" hidden>
-            <div class="card empty">
-                <span class="empty__icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>
-                </span>
-                <p class="empty__title">O painel de Cooperados está a caminho</p>
-                <p class="empty__text">Assim que o módulo de Cooperados for disponibilizado, os indicadores dele aparecerão aqui.</p>
+        <!-- Tema: Cooperados --------------------------------------------- -->
+        <section class="dash-panel" id="painel-cooperados" role="tabpanel" aria-labelledby="tab-cooperados" data-panel="cooperados" hidden>
+
+            <div class="dash-kpis dash-kpis--3" data-coop-kpis aria-live="polite"></div>
+
+            <div class="dash-grid dash-grid--coop" data-coop-grid>
+                <article class="card dash-card" aria-labelledby="titulo-faixas">
+                    <header class="dash-card__head">
+                        <div>
+                            <h2 class="dash-card__title" id="titulo-faixas">Cooperados por faixa de pontuação</h2>
+                            <p class="dash-card__subtitle" data-coop-bands-subtitle>Percentual da pontuação máxima possível no ano</p>
+                        </div>
+                    </header>
+                    <div class="dash-card__body" data-coop-bands></div>
+                </article>
+
+                <article class="card dash-card" aria-labelledby="titulo-treinamento">
+                    <header class="dash-card__head">
+                        <div>
+                            <h2 class="dash-card__title" id="titulo-treinamento">Cursos e horas de treinamento por cooperado</h2>
+                            <p class="dash-card__subtitle" data-coop-training-subtitle>Cooperados ativos, maior carga horária primeiro</p>
+                        </div>
+                    </header>
+                    <div class="dash-card__body" data-coop-training></div>
+                </article>
             </div>
         </section>
 

@@ -16,6 +16,7 @@ import {
     toIso, todayIso, fromIso, formatDay, formatDayShort, monthLabel, weightParts, formatWeight,
 } from '../format.js';
 import { stackedColumns, donut, hbars, tipContent } from './charts.js';
+import { showCooperados } from './cooperados.js';
 
 // Cor de cada tipo pela ordem de id (Reciclável → água, Não Reciclável → laranja, Orgânico → azul).
 // A cor acompanha o tipo, nunca a posição no gráfico; validadas para daltonismo em claro e escuro.
@@ -33,6 +34,7 @@ let allowedThemes = ['residuos'];
 
 const tabsEl = document.querySelector('[data-theme-tabs]');
 const filtersEl = document.querySelector('[data-filters]');
+const coopFiltersEl = document.querySelector('[data-coop-filters]');
 const presetsEl = document.querySelector('[data-presets]');
 const fromInput = document.querySelector('[data-from]');
 const toInput = document.querySelector('[data-to]');
@@ -266,6 +268,7 @@ function selectTheme(theme) {
     history.replaceState(null, '', `#${theme}`);
     renderTheme();
     if (theme === 'residuos') render(); // os gráficos precisam medir o container visível
+    if (theme === 'cooperados') showCooperados(); // busca só na primeira abertura da aba
 }
 
 function renderTheme() {
@@ -275,8 +278,9 @@ function renderTheme() {
         tab.tabIndex = active ? 0 : -1;
     });
     document.querySelectorAll('[data-panel]').forEach((panel) => { panel.hidden = panel.dataset.panel !== state.theme; });
-    // Os filtros só se aplicam a temas com dados
+    // Cada tema tem os próprios filtros: período/unidade em Resíduos, ano-base em Cooperados
     filtersEl.hidden = state.theme !== 'residuos';
+    coopFiltersEl.hidden = state.theme !== 'cooperados';
     document.title = `Dashboard · ${state.theme === 'residuos' ? 'Resíduos' : 'Cooperados'} · Acompanhamento ESG`;
 }
 

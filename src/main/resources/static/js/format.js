@@ -62,3 +62,10 @@ export function formatWeight(kg) {
     const { value, unit } = weightParts(kg);
     return `${value} ${unit}`;
 }
+
+// Carga horária em minutos -> "12h30" (sem arredondar para horas inteiras)
+export function formatMinutes(minutes) {
+    if (minutes === null || minutes === undefined) return '–';
+    const hours = Math.floor(minutes / 60);
+    return `${intFormat.format(hours)}h${String(minutes % 60).padStart(2, '0')}`;
+}
