@@ -9,6 +9,12 @@ app:
     expiration: ${JWT_EXPIRATION:86400000}
   security:
     cookie-secure: ${COOKIE_SECURE:false}
+  integrations:
+    certificados-cooperados:
+      base-url: ${CERT_COOP_URL:http://192.168.1.168:8080/certificados-cooperados}
+      username: ${CERT_COOP_USERNAME:admin}
+      password: ${CERT_COOP_PASSWORD:Uny$$p@0249}
+      token-ttl: ${CERT_COOP_TOKEN_TTL:23h}
 
 spring:
   datasource:

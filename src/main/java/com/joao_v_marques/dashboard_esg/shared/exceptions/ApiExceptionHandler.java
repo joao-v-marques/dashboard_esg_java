@@ -74,6 +74,14 @@ public class ApiExceptionHandler {
                 .body(ApiError.of(ex.getMessage()));
     }
 
+    // Tratamento para falha na comunicação com outra aplicação -> 502
+    @ExceptionHandler(UpstreamException.class)
+    public ResponseEntity<ApiError> handleUpstream(UpstreamException ex) {
+        log.warn("Falha na integração: {}", ex.getMessage(), ex.getCause());
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(ApiError.of(ex.getMessage()));
+    }
+
     private String messageOf(FieldError error) {
         return error.isBindingFailure()
                 ? "O valor informado não é válido para este campo."

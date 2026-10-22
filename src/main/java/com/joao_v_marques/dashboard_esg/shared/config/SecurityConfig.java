@@ -45,6 +45,9 @@ public class SecurityConfig {
                         // As abas de outros temas do dashboard são escondidas no front; as APIs delas exigirão MANAGER
                         .requestMatchers("/dashboard", "/wastes", "/api/waste-records/**", "/api/waste-types/**").hasRole(Role.EMPLOYEE_WASTES)
 
+                        // Aba de Cooperados do dashboard (dados vindos do certificados-cooperados): MANAGER e acima
+                        .requestMatchers("/api/cooperative-members/**").hasRole(Role.MANAGER)
+
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
