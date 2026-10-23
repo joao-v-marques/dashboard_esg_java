@@ -48,8 +48,8 @@ public class SecurityConfig {
                         // Aba de Cooperados do dashboard (dados vindos do certificados-cooperados): MANAGER e acima
                         .requestMatchers("/api/cooperative-members/**").hasRole(Role.MANAGER)
 
-                        // Módulo de NIP's (telas e cadastros de NIP, status e natureza): MANAGER e acima
-                        .requestMatchers("/nips/**", "/api/nips/**", "/api/nip-status/**", "/api/nip-natures/**").hasRole(Role.MANAGER)
+                        // Módulo de NIP's (telas e cadastros de NIP, status e natureza): EMPLOYEE_LEGAL e acima (MANAGER, ADMINISTRATOR)
+                        .requestMatchers("/nips/**", "/api/nips/**", "/api/nip-status/**", "/api/nip-natures/**").hasRole(Role.EMPLOYEE_LEGAL)
 
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -67,7 +67,7 @@ public class SecurityConfig {
     static RoleHierarchy roleHierarchy() {
         return RoleHierarchyImpl.withDefaultRolePrefix()
                 .role(Role.ADMINISTRATOR).implies(Role.MANAGER)
-                .role(Role.MANAGER).implies(Role.EMPLOYEE_WASTES)
+                .role(Role.MANAGER).implies(Role.EMPLOYEE_WASTES, Role.EMPLOYEE_LEGAL)
                 .build();
     }
 

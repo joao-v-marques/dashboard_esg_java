@@ -14,13 +14,14 @@ import java.util.Set;
 @NoArgsConstructor
 public class Role {
 
-    // Roles usadas no SecurityConfig (hasRole e hierarquia ADMINISTRATOR > MANAGER > EMPLOYEE_WASTES)
+    // Roles usadas no SecurityConfig (hasRole e hierarquia ADMINISTRATOR > MANAGER > EMPLOYEE_WASTES / EMPLOYEE_LEGAL)
     public static final String ADMINISTRATOR = "ADMINISTRATOR";
     public static final String MANAGER = "MANAGER";
     public static final String EMPLOYEE_WASTES = "EMPLOYEE_WASTES";
+    public static final String EMPLOYEE_LEGAL = "EMPLOYEE_LEGAL";
 
     // Editar ou desativar qualquer uma delas tiraria o acesso de quem a possui
-    public static final Set<String> PROTECTED = Set.of(ADMINISTRATOR, MANAGER, EMPLOYEE_WASTES);
+    public static final Set<String> PROTECTED = Set.of(ADMINISTRATOR, MANAGER, EMPLOYEE_WASTES, EMPLOYEE_LEGAL);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -4,8 +4,8 @@
   Só estrutura: os dados do usuário são preenchidos por js/shell.js a partir
   do GET /api/auth/me. Para um novo módulo, adicione o link na sidebar e passe
   o identificador em sidebar('<modulo>') na página.
-  Itens restritos levam data-requires-role="<ROLE>" e hidden: js/shell.js revela
-  para quem tem a role (com a hierarquia do backend); a rota é protegida no SecurityConfig.
+  Itens restritos levam data-requires-role="<ROLE> [<ROLE>...]" e hidden: js/shell.js revela
+  para quem tem alguma delas (com a hierarquia do backend); a rota é protegida no SecurityConfig.
 -->
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -124,7 +124,7 @@
         </ul>
 
         <!-- O rótulo "Módulos" só aparece para quem tem ao menos um módulo -->
-        <p class="sidebar__label sidebar__label--section" data-requires-role="EMPLOYEE_WASTES" hidden>Módulos</p>
+        <p class="sidebar__label sidebar__label--section" data-requires-role="EMPLOYEE_WASTES EMPLOYEE_LEGAL" hidden>Módulos</p>
         <ul class="sidebar__list">
             <!-- Grupo recolhível: vem aberto quando a página ativa pertence a ele (js/shell.js alterna) -->
             <li class="sidebar__group" th:with="inWastes=${active == 'wastes'}" data-requires-role="EMPLOYEE_WASTES" hidden>
@@ -144,7 +144,7 @@
                     </li>
                 </ul>
             </li>
-            <li class="sidebar__group" th:with="inNips=${active == 'nips-register'}" data-requires-role="MANAGER" hidden>
+            <li class="sidebar__group" th:with="inNips=${active == 'nips-register'}" data-requires-role="EMPLOYEE_LEGAL" hidden>
                 <button class="sidebar__link sidebar__group-toggle" type="button" data-nav-group
                         aria-controls="nav-nips"
                         th:classappend="${inNips} ? 'has-active'"
