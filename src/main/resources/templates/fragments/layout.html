@@ -144,6 +144,23 @@
                     </li>
                 </ul>
             </li>
+            <li class="sidebar__group" th:with="inNips=${active == 'nips-register'}" data-requires-role="MANAGER" hidden>
+                <button class="sidebar__link sidebar__group-toggle" type="button" data-nav-group
+                        aria-controls="nav-nips"
+                        th:classappend="${inNips} ? 'has-active'"
+                        th:attr="aria-expanded=${inNips} ? 'true' : 'false'">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 11v3M12 17.5h.01"/></svg>
+                    <span>NIP's</span>
+                    <svg class="sidebar__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <ul class="sidebar__sublist" id="nav-nips" th:attr="hidden=${inNips} ? null : 'hidden'">
+                    <li>
+                        <a class="sidebar__sublink" th:href="@{/nips/register}"
+                           th:classappend="${active == 'nips-register'} ? 'is-active'"
+                           th:attr="aria-current=${active == 'nips-register'} ? 'page' : null">Registrar NIP</a>
+                    </li>
+                </ul>
+            </li>
         </ul>
     </nav>
 
