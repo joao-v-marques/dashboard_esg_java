@@ -48,6 +48,9 @@ public class SecurityConfig {
                         // Aba de Cooperados do dashboard (dados vindos do certificados-cooperados): MANAGER e acima
                         .requestMatchers("/api/cooperative-members/**").hasRole(Role.MANAGER)
 
+                        // Módulo de NIP's (telas e cadastros de NIP, status e natureza): MANAGER e acima
+                        .requestMatchers("/nips/**", "/api/nips/**", "/api/nip-status/**", "/api/nip-natures/**").hasRole(Role.MANAGER)
+
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
