@@ -6,6 +6,9 @@
   GET /api/waste-records, /api/waste-types e /api/units.
   Cooperados: js/dashboard/cooperados.js, a partir de
   GET /api/cooperative-members/dashboard (dados do certificados-cooperados).
+  NIP's: js/dashboard/nips.js, agregado no cliente a partir de
+  GET /api/nips, /api/nip-status e /api/nip-natures.
+  Cada aba (e os filtros dela) só aparece para quem tem a role do tema.
 -->
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -29,7 +32,8 @@
                 <h1 class="dash-bar__title">Dashboard</h1>
                 <div class="theme-tabs" role="tablist" aria-label="Tema do dashboard" data-theme-tabs>
                     <button class="theme-tabs__tab" type="button" role="tab" id="tab-residuos" data-tab="residuos"
-                            aria-controls="painel-residuos" aria-selected="true">
+                            aria-controls="painel-residuos" aria-selected="false" tabindex="-1"
+                            data-requires-role="EMPLOYEE_WASTES" hidden>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7l3.9-6.7"/><path d="m11 19 3 3M11 19l3-3M11 19h6.2a1.8 1.8 0 0 0 1.6-2.7l-1.2-2"/><path d="m14.2 7.4-1.6-2.6a1.8 1.8 0 0 0-3.1 0L8.4 6.6"/><path d="m7.1 9.6-3.1-.8.8 3.1M14.2 7.4l3.1.8-.8-3.1"/></svg>
                         Resíduos
                     </button>
@@ -39,10 +43,16 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>
                         Cooperados
                     </button>
+                    <button class="theme-tabs__tab" type="button" role="tab" id="tab-nips" data-tab="nips"
+                            aria-controls="painel-nips" aria-selected="false" tabindex="-1"
+                            data-requires-role="EMPLOYEE_LEGAL" hidden>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h6M8 13h8M8 17h5"/></svg>
+                        NIP's
+                    </button>
                 </div>
             </div>
 
-            <form class="dash-filters" data-filters aria-label="Filtros do dashboard">
+            <form class="dash-filters" data-filters aria-label="Filtros do dashboard" hidden>
                 <div class="segmented dash-filters__presets" role="group" aria-label="Período" data-presets>
                     <button class="segmented__option" type="button" data-preset="month" aria-pressed="false" title="Do dia 1º do mês atual até hoje">Mês</button>
                     <button class="segmented__option" type="button" data-preset="3m" aria-pressed="false" title="Últimos 3 meses, incluindo o atual">3M</button>
@@ -74,10 +84,24 @@
                     <select class="filters__select field__input--select" name="year" data-coop-year></select>
                 </label>
             </form>
+
+            <!-- NIP's: ano da notificação e natureza; trocar o filtro só recalcula no cliente -->
+            <form class="dash-filters" data-nip-filters aria-label="Filtros de NIP's" hidden>
+                <label class="dash-filters__year">
+                    <span class="dash-filters__sep">Ano</span>
+                    <select class="filters__select field__input--select" name="year" data-nip-year></select>
+                </label>
+                <label class="dash-filters__nature">
+                    <span class="visually-hidden">Natureza</span>
+                    <select class="filters__select field__input--select" name="nature" data-nip-nature>
+                        <option value="">Todas as naturezas</option>
+                    </select>
+                </label>
+            </form>
         </header>
 
         <!-- Tema: Resíduos ----------------------------------------------- -->
-        <section class="dash-panel" id="painel-residuos" role="tabpanel" aria-labelledby="tab-residuos" data-panel="residuos">
+        <section class="dash-panel" id="painel-residuos" role="tabpanel" aria-labelledby="tab-residuos" data-panel="residuos" hidden>
 
             <div class="dash-kpis" data-kpis aria-live="polite"></div>
 
@@ -143,6 +167,56 @@
                         </div>
                     </header>
                     <div class="dash-card__body" data-coop-training></div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Tema: NIP's -------------------------------------------------- -->
+        <section class="dash-panel" id="painel-nips" role="tabpanel" aria-labelledby="tab-nips" data-panel="nips" hidden>
+
+            <div class="dash-kpis dash-kpis--4" data-nip-kpis aria-live="polite"></div>
+
+            <div class="dash-grid dash-grid--nips" data-nip-grid>
+                <article class="card dash-card dash-card--nip-trend" aria-labelledby="titulo-nip-evolucao">
+                    <header class="dash-card__head">
+                        <div>
+                            <h2 class="dash-card__title" id="titulo-nip-evolucao">Evolução mensal de NIP's</h2>
+                            <p class="dash-card__subtitle" data-nip-trend-subtitle>NIP's por mês de notificação, comparadas ao ano anterior</p>
+                        </div>
+                        <ul class="legend" data-nip-legend aria-label="Legenda"></ul>
+                    </header>
+                    <div class="chart chart--columns" data-nip-chart="trend"></div>
+                </article>
+
+                <article class="card dash-card dash-card--nip-status" aria-labelledby="titulo-nip-status">
+                    <header class="dash-card__head">
+                        <div>
+                            <h2 class="dash-card__title" id="titulo-nip-status">Status de encerramento</h2>
+                            <p class="dash-card__subtitle" data-nip-status-subtitle>NIP's finalizadas, por status</p>
+                        </div>
+                    </header>
+                    <div class="dash-card__body" data-nip-status></div>
+                </article>
+
+                <article class="card dash-card dash-card--nip-half" aria-labelledby="titulo-nip-natureza">
+                    <header class="dash-card__head">
+                        <div>
+                            <h2 class="dash-card__title" id="titulo-nip-natureza">Taxa de resolução por natureza</h2>
+                            <p class="dash-card__subtitle">Resolvidas (RVE) sobre as finalizadas · todas as naturezas</p>
+                        </div>
+                    </header>
+                    <div class="dash-card__body" data-nip-natures></div>
+                </article>
+
+                <article class="card dash-card dash-card--nip-half" aria-labelledby="titulo-nip-reincidentes">
+                    <header class="dash-card__head">
+                        <div>
+                            <h2 class="dash-card__title" id="titulo-nip-reincidentes">Beneficiários reincidentes</h2>
+                            <p class="dash-card__subtitle" data-nip-repeat-subtitle>Beneficiários com 2 ou mais NIP's no ano</p>
+                        </div>
+                        <span class="nip-count" data-nip-repeat-count hidden></span>
+                    </header>
+                    <div class="dash-card__body" data-nip-repeat></div>
                 </article>
             </div>
         </section>

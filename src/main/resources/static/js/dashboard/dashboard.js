@@ -6,6 +6,11 @@
    KPIs com variação vs. o período anterior, evolução mensal por tipo,
    composição por tipo (rosca + tabela) e detalhamento por unidade.
    "Reciclado" segue waste_types.is_recyclable.
+
+   Cada tema só aparece para a role dele (THEME_ROLES). O tema inicial é o do
+   hash, se permitido, ou o primeiro permitido; os dados de um tema só são
+   buscados quando a aba dele é aberta (quem não tem EMPLOYEE_WASTES nunca
+   chama /api/waste-records).
    ========================================================================== */
 
 import { currentUser, hasRole } from '../shell.js';
@@ -17,6 +22,7 @@ import {
 } from '../format.js';
 import { stackedColumns, donut, hbars, tipContent } from './charts.js';
 import { showCooperados } from './cooperados.js';
+import { showNips } from './nips.js';
 
 // Cor de cada tipo pela ordem de id (Reciclável → água, Não Reciclável → laranja, Orgânico → azul).
 // A cor acompanha o tipo, nunca a posição no gráfico; validadas para daltonismo em claro e escuro.
@@ -26,15 +32,17 @@ const COLOR_NOT_RECYCLED = 'var(--color-chart-2)';
 const COLOR_OTHER = 'var(--color-text-faint)';
 
 // Role mínima para ver cada tema (a aba fica oculta via data-requires-role no HTML)
-const THEME_ROLES = { residuos: 'EMPLOYEE_WASTES', cooperados: 'MANAGER' };
+const THEME_ROLES = { residuos: 'EMPLOYEE_WASTES', cooperados: 'MANAGER', nips: 'EMPLOYEE_LEGAL' };
 const THEMES = Object.keys(THEME_ROLES);
+const THEME_TITLES = { residuos: 'Resíduos', cooperados: 'Cooperados', nips: "NIP's" };
 
-// Até o usuário carregar, só Resíduos (todo usuário que chega no /dashboard pode vê-lo)
-let allowedThemes = ['residuos'];
+// Nenhum tema até o usuário carregar: não dá para saber quais ele pode ver
+let allowedThemes = [];
 
 const tabsEl = document.querySelector('[data-theme-tabs]');
 const filtersEl = document.querySelector('[data-filters]');
 const coopFiltersEl = document.querySelector('[data-coop-filters]');
+const nipFiltersEl = document.querySelector('[data-nip-filters]');
 const presetsEl = document.querySelector('[data-presets]');
 const fromInput = document.querySelector('[data-from]');
 const toInput = document.querySelector('[data-to]');
@@ -50,8 +58,8 @@ const detailTabs = document.querySelector('[data-detail-tabs]');
 const detailBody = document.querySelector('[data-detail-body]');
 
 const state = {
-    theme: themeFromHash() ?? 'residuos',
-    status: 'loading',
+    theme: null,
+    status: 'idle',
     error: null,
     records: [],
     types: [],
@@ -67,8 +75,6 @@ bindTabs();
 bindFilters();
 applyPreset(state.preset);
 renderTheme();
-render();
-load();
 
 /* Dados -------------------------------------------------------------------- */
 
@@ -231,11 +237,11 @@ function themeFromHash() {
     return allowedThemes.includes(id) ? id : null;
 }
 
-// Libera os temas do perfil; um #tema não permitido na URL cai em Resíduos
+// Libera os temas do perfil; um #tema ausente ou não permitido na URL cai no primeiro permitido
 function applyThemeAccess(user) {
     allowedThemes = THEMES.filter((theme) => hasRole(user, THEME_ROLES[theme]));
-    const theme = themeFromHash() ?? 'residuos';
-    if (theme !== state.theme || (location.hash && location.hash !== `#${theme}`)) selectTheme(theme);
+    const theme = themeFromHash() ?? allowedThemes[0];
+    if (theme) selectTheme(theme);
 }
 
 function bindTabs() {
@@ -267,8 +273,13 @@ function selectTheme(theme) {
     state.theme = theme;
     history.replaceState(null, '', `#${theme}`);
     renderTheme();
-    if (theme === 'residuos') render(); // os gráficos precisam medir o container visível
-    if (theme === 'cooperados') showCooperados(); // busca só na primeira abertura da aba
+    // Cada tema busca os dados só na primeira abertura da aba; os gráficos precisam medir o container visível
+    if (theme === 'residuos') {
+        if (state.status === 'idle') load();
+        else render();
+    }
+    if (theme === 'cooperados') showCooperados();
+    if (theme === 'nips') showNips();
 }
 
 function renderTheme() {
@@ -278,10 +289,13 @@ function renderTheme() {
         tab.tabIndex = active ? 0 : -1;
     });
     document.querySelectorAll('[data-panel]').forEach((panel) => { panel.hidden = panel.dataset.panel !== state.theme; });
-    // Cada tema tem os próprios filtros: período/unidade em Resíduos, ano-base em Cooperados
+    // Cada tema tem os próprios filtros: período/unidade em Resíduos, ano-base em Cooperados, ano/natureza em NIP's
     filtersEl.hidden = state.theme !== 'residuos';
     coopFiltersEl.hidden = state.theme !== 'cooperados';
-    document.title = `Dashboard · ${state.theme === 'residuos' ? 'Resíduos' : 'Cooperados'} · Acompanhamento ESG`;
+    nipFiltersEl.hidden = state.theme !== 'nips';
+    document.title = state.theme
+        ? `Dashboard · ${THEME_TITLES[state.theme]} · Acompanhamento ESG`
+        : 'Dashboard · Acompanhamento ESG';
 }
 
 /* Agregação ---------------------------------------------------------------- */

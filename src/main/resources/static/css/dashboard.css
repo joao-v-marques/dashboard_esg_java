@@ -382,3 +382,101 @@
   .donut-layout { grid-template-columns: 140px minmax(0, 1fr); height: 160px; }
   .theme-tabs { max-width: 100%; }
 }
+
+/* ==========================================================================
+   NIP's: 4 KPIs; evolução (2/3) + status (1/3); natureza + reincidentes (1/2 cada).
+   Fica no fim do arquivo para sobrepor as regras genéricas de .dash-grid acima.
+   ========================================================================== */
+.dash-filters__nature .filters__select { width: 200px; }
+
+.dash-kpis--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+/* "Aguardando abertura de processo" não cabe numa linha em 4 colunas: quebra em vez de cortar */
+.dash-kpis--4 .stat__label { white-space: normal; }
+
+/* Tons dos KPIs: a cor só reforça o texto do rodapé */
+.stat--info { --stat-accent: var(--color-pillar-s); }
+.stat--info .stat__icon { background: var(--color-pillar-s-bg); color: var(--color-pillar-s); }
+.stat--danger { --stat-accent: var(--color-danger); background: var(--color-danger-bg); border-color: var(--color-danger-border); }
+.stat--danger .stat__icon { background: var(--color-surface); color: var(--color-danger); }
+.stat--danger .stat__value,
+.stat--danger .stat__foot { color: var(--color-danger); }
+.stat--danger .stat__foot { font-weight: 600; }
+.stat__foot svg { flex: none; width: 13px; height: 13px; }
+.stat .meter { height: 6px; margin: 4px 0 2px; }
+
+.dash-grid--nips {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1.2fr) minmax(0, 1fr);
+}
+.dash-card--nip-trend { grid-column: span 4; }
+.dash-card--nip-status { grid-column: span 2; }
+.dash-card--nip-half { grid-column: span 3; }
+
+/* Status longos quebram linha dentro do próprio rótulo, sem empurrar o valor */
+.dash-card--nip-status .hbars__label { min-width: 0; overflow-wrap: anywhere; }
+
+/* Contagem de reincidentes no cabeçalho do card */
+.nip-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-tint);
+  color: var(--color-brand-strong);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.nip-count[hidden] { display: none; }
+
+/* Taxa de resolução por natureza */
+.nip-rates { display: grid; gap: var(--space-4); margin: 0; padding: 2px 0 0; list-style: none; }
+.nip-rates__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.nip-rates__name { min-width: 0; font-size: var(--text-sm); font-weight: 600; color: var(--color-text-secondary); }
+.nip-rates__pct { font-size: var(--text-xl); font-weight: 700; letter-spacing: -0.02em; color: var(--color-text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nip-rates__foot { font-size: var(--text-xs); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+
+/* Beneficiários reincidentes */
+.nip-repeat { display: grid; margin: 0; padding: 0; list-style: none; }
+.nip-repeat__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.nip-repeat__item:last-child { border-bottom: 0; }
+.nip-repeat__who,
+.nip-repeat__stats { display: grid; gap: 2px; min-width: 0; }
+.nip-repeat__stats { flex: none; justify-items: end; text-align: right; }
+.nip-repeat__name { overflow: hidden; font-size: var(--text-sm); font-weight: 600; color: var(--color-text); text-overflow: ellipsis; white-space: nowrap; }
+.nip-repeat__cpf,
+.nip-repeat__last { font-size: var(--text-xs); color: var(--color-text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nip-repeat__count { font-size: var(--text-sm); font-weight: 700; color: var(--color-text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+@media (max-width: 1279px) {
+  .dash-kpis--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* Página rolando: a grade de NIP's mantém as colunas, mas com altura automática */
+@media (max-width: 1023px), (max-height: 620px) {
+  .dash-grid--nips { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: none; }
+}
+
+@media (max-width: 900px) {
+  .dash-kpis--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dash-grid--nips { grid-template-columns: minmax(0, 1fr); }
+  .dash-grid--nips > .dash-card { grid-column: auto; }
+}
+
+@media (max-width: 640px) {
+  .dash-filters__nature { flex: 1 1 0; min-width: 0; }
+  .dash-filters__nature .filters__select { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .dash-kpis--4 { grid-template-columns: minmax(0, 1fr); }
+}

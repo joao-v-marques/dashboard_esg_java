@@ -116,12 +116,14 @@ window.addEventListener('scroll', hideTip, { passive: true });
 
 /* Escala ------------------------------------------------------------------- */
 
-function niceScale(max, count = 4) {
-    if (!(max > 0)) return { max: 1, step: 1 / count };
+// integer: contagens não têm tick fracionado (passo mínimo 1)
+function niceScale(max, count = 4, integer = false) {
+    if (!(max > 0)) return integer ? { max: 1, step: 1 } : { max: 1, step: 1 / count };
     const raw = max / count;
     const magnitude = 10 ** Math.floor(Math.log10(raw));
     const norm = raw / magnitude;
-    const step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * magnitude;
+    let step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * magnitude;
+    if (integer) step = Math.max(1, Math.ceil(step));
     return { max: Math.ceil(max / step) * step, step };
 }
 
@@ -142,20 +144,23 @@ function topRoundedRect(x, y, w, h, r) {
  *   formatValue: (n: number) => string,
  *   tooltip: (categoryIndex: number) => Node,
  *   describe: (categoryIndex: number) => string,
+ *   grouped?: boolean,   // séries lado a lado na faixa em vez de empilhadas (rótulo só na 1ª série)
+ *   integer?: boolean,   // eixo Y só com inteiros (contagens)
  * }} options
  */
 export function stackedColumns(container, options) {
     mount(container, () => drawStackedColumns(container, options));
 }
 
-function drawStackedColumns(container, { categories, series, value, formatValue, tooltip, describe }) {
+function drawStackedColumns(container, { categories, series, value, formatValue, tooltip, describe, grouped = false, integer = false }) {
     const width = container.clientWidth;
     const height = container.clientHeight;
     container.replaceChildren();
     if (width < 40 || height < 60) return;
 
     const totals = categories.map((c) => series.reduce((sum, s) => sum + (value(c.key, s.key) || 0), 0));
-    const { max, step } = niceScale(Math.max(...totals, 0));
+    const peaks = grouped ? categories.map((c) => Math.max(...series.map((s) => value(c.key, s.key) || 0), 0)) : totals;
+    const { max, step } = niceScale(Math.max(...peaks, 0), 4, integer);
 
     const tickLabels = [];
     for (let v = 0; v <= max + step / 2; v += step) tickLabels.push(v);
@@ -164,7 +169,9 @@ function drawStackedColumns(container, { categories, series, value, formatValue,
     const plotW = width - margin.left - margin.right;
     const plotH = height - margin.top - margin.bottom;
     const band = plotW / Math.max(categories.length, 1);
-    const barW = Math.max(6, Math.min(BAR_MAX, band * 0.56));
+    const barW = grouped
+        ? Math.max(4, Math.min(BAR_MAX * 0.75, (band * 0.7 - GAP * (series.length - 1)) / series.length))
+        : Math.max(6, Math.min(BAR_MAX, band * 0.56));
     const y = (v) => margin.top + plotH - (v / max) * plotH;
 
     const svg = svgEl('svg', { width, height, viewBox: `0 0 ${width} ${height}`, class: 'chart-svg', role: 'group' });
@@ -182,7 +189,9 @@ function drawStackedColumns(container, { categories, series, value, formatValue,
 
     // Com muitas categorias, mostra só parte dos rótulos do eixo X
     const labelEvery = Math.ceil(categories.length / Math.max(1, Math.floor(plotW / 44)));
-    const maxIndex = totals.indexOf(Math.max(...totals));
+    // Agrupado: o rótulo acompanha a 1ª série (a principal), não a soma
+    const capValues = grouped ? categories.map((c) => value(c.key, series[0]?.key) || 0) : totals;
+    const maxIndex = capValues.indexOf(Math.max(...capValues));
     const lastIndex = totals.length - 1;
 
     categories.forEach((category, index) => {
@@ -193,7 +202,18 @@ function drawStackedColumns(container, { categories, series, value, formatValue,
         // Fundo da faixa (realce no hover) e área de clique maior que a coluna
         group.append(svgEl('rect', { x: bandX + 1, y: margin.top, width: Math.max(0, band - 2), height: plotH, rx: 6, class: 'chart-col__hit' }));
 
-        const visible = series.filter((s) => (value(category.key, s.key) || 0) > 0);
+        if (grouped) {
+            const groupW = barW * series.length + GAP * (series.length - 1);
+            series.forEach((s, i) => {
+                const v = value(category.key, s.key) || 0;
+                const h = Math.max(0, y(0) - y(v));
+                if (h > 0) {
+                    group.append(svgEl('path', { d: topRoundedRect(bandX + (band - groupW) / 2 + i * (barW + GAP), y(v), barW, h, RADIUS), fill: s.color, class: 'chart-col__seg' }));
+                }
+            });
+        }
+
+        const visible = grouped ? [] : series.filter((s) => (value(category.key, s.key) || 0) > 0);
         let base = 0;
         visible.forEach((s, i) => {
             const v = value(category.key, s.key);
@@ -212,9 +232,10 @@ function drawStackedColumns(container, { categories, series, value, formatValue,
         });
 
         // Rótulo do total: em todas as colunas se forem poucas; senão só no maior e no último mês
-        const total = totals[index];
+        const total = capValues[index];
         if (total > 0 && (categories.length <= 6 || index === maxIndex || index === lastIndex)) {
-            const cap = svgEl('text', { x: x + barW / 2, y: y(total) - 6, class: 'chart-cap', 'text-anchor': 'middle' });
+            const capX = grouped ? bandX + (band - (barW * series.length + GAP * (series.length - 1))) / 2 + barW / 2 : x + barW / 2;
+            const cap = svgEl('text', { x: capX, y: y(total) - 6, class: 'chart-cap', 'text-anchor': 'middle' });
             cap.textContent = formatValue(total);
             group.append(cap);
         }

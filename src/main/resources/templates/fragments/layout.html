@@ -113,7 +113,7 @@
                     <span>Início</span>
                 </a>
             </li>
-            <li data-requires-role="EMPLOYEE_WASTES" hidden>
+            <li data-requires-role="EMPLOYEE_WASTES EMPLOYEE_LEGAL" hidden>
                 <a class="sidebar__link" th:href="@{/dashboard}"
                    th:classappend="${active == 'dashboard'} ? 'is-active'"
                    th:attr="aria-current=${active == 'dashboard'} ? 'page' : null">

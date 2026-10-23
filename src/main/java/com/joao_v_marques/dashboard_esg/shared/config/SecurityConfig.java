@@ -41,9 +41,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/units/**").hasRole(Role.ADMINISTRATOR)
                         .requestMatchers(HttpMethod.PUT, "/api/units/**").hasRole(Role.ADMINISTRATOR)
 
-                        // Módulo de resíduos: EMPLOYEE_WASTES e acima (MANAGER, ADMINISTRATOR) pela hierarquia.
-                        // As abas de outros temas do dashboard são escondidas no front; as APIs delas exigirão MANAGER
-                        .requestMatchers("/dashboard", "/wastes", "/api/waste-records/**", "/api/waste-types/**").hasRole(Role.EMPLOYEE_WASTES)
+                        // Dashboard: quem vê ao menos um tema (Resíduos ou NIP's). Cada aba é escondida no front
+                        // conforme a role, e a API de cada tema continua exigindo a própria role
+                        .requestMatchers("/dashboard").hasAnyRole(Role.EMPLOYEE_WASTES, Role.EMPLOYEE_LEGAL)
+
+                        // Módulo de resíduos: EMPLOYEE_WASTES e acima (MANAGER, ADMINISTRATOR) pela hierarquia
+                        .requestMatchers("/wastes", "/api/waste-records/**", "/api/waste-types/**").hasRole(Role.EMPLOYEE_WASTES)
 
                         // Aba de Cooperados do dashboard (dados vindos do certificados-cooperados): MANAGER e acima
                         .requestMatchers("/api/cooperative-members/**").hasRole(Role.MANAGER)
