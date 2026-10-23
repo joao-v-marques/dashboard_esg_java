@@ -1,0 +1,284 @@
+<!doctype html>
+<!--
+  NIP's › Registrar NIP.
+  Formulário em seções (identificação, beneficiário, classificação e descrições)
+  com resumo ao vivo ao lado. Naturezas e status vêm de GET /api/nip-natures e
+  /api/nip-status; o envio e o painel de confirmação ficam em js/nips/register.js.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: appHead('Registrar NIP')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/nips.css}">
+</head>
+
+<body>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header th:replace="~{fragments/layout :: topbar}"></header>
+<aside th:replace="~{fragments/layout :: sidebar('nips-register')}"></aside>
+<div class="sidebar-scrim" data-sidebar-scrim hidden></div>
+
+<main class="app-main" id="conteudo">
+    <div class="page page--wide">
+
+        <header class="page-head">
+            <p class="page-head__eyebrow">Governança · NIP's</p>
+            <h1 class="page-head__title">Registrar NIP</h1>
+            <p class="page-head__subtitle">Lance uma nova Notificação de Intermediação Preliminar com os dados da demanda, do beneficiário e a classificação atual.</p>
+        </header>
+
+        <div class="nip-layout" data-layout>
+            <section class="card nip-card" aria-label="Formulário de registro da NIP">
+                <form class="nip-form" data-nip-form novalidate>
+
+                    <div class="alert nip-form__alert" role="alert" data-form-alert hidden>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                        <span></span>
+                    </div>
+
+                    <!-- 1. Identificação ------------------------------------------------ -->
+                    <section class="nip-section" aria-labelledby="secao-identificacao">
+                        <header class="nip-section__head">
+                            <span class="nip-section__step" aria-hidden="true">1</span>
+                            <div>
+                                <h2 class="nip-section__title" id="secao-identificacao">Identificação da NIP</h2>
+                                <p class="nip-section__description">Dados da notificação recebida. Número e protocolo não podem se repetir.</p>
+                            </div>
+                        </header>
+
+                        <div class="form-grid">
+                            <div class="field" data-field="nipNumber">
+                                <label class="field__label" for="nip-number">Número da NIP <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <input class="field__input field__input--plain nip-input--mono" id="nip-number" name="nipNumber" type="text"
+                                           inputmode="numeric" maxlength="11" placeholder="Ex: 000000/2026" autocomplete="off" spellcheck="false" required
+                                           aria-describedby="nip-number-error">
+                                </div>
+                                <p class="field__error" id="nip-number-error" data-field-error hidden></p>
+                            </div>
+
+                            <div class="field" data-field="notificationDate">
+                                <label class="field__label" for="nip-notification-date">Data de notificação <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <input class="field__input field__input--plain" id="nip-notification-date" name="notificationDate" type="date"
+                                           required aria-describedby="nip-notification-date-error">
+                                </div>
+                                <p class="field__error" id="nip-notification-date-error" data-field-error hidden></p>
+                            </div>
+
+                            <div class="field" data-field="protocolCode">
+                                <label class="field__label" for="nip-protocol">Protocolo <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <input class="field__input field__input--plain nip-input--mono" id="nip-protocol" name="protocolCode" type="text"
+                                           maxlength="50" autocomplete="off" spellcheck="false" required
+                                           aria-describedby="nip-protocol-error">
+                                </div>
+                                <p class="field__error" id="nip-protocol-error" data-field-error hidden></p>
+                            </div>
+
+                            <div class="field" data-field="demandCode">
+                                <label class="field__label" for="nip-demand">Código da demanda <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <input class="field__input field__input--plain nip-input--mono" id="nip-demand" name="demandCode" type="text"
+                                           maxlength="50" autocomplete="off" spellcheck="false" required
+                                           aria-describedby="nip-demand-error">
+                                </div>
+                                <p class="field__error" id="nip-demand-error" data-field-error hidden></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 2. Beneficiário ------------------------------------------------- -->
+                    <section class="nip-section" aria-labelledby="secao-beneficiario">
+                        <header class="nip-section__head">
+                            <span class="nip-section__step" aria-hidden="true">2</span>
+                            <div>
+                                <h2 class="nip-section__title" id="secao-beneficiario">Beneficiário</h2>
+                                <p class="nip-section__description">Quem abriu a demanda junto à ANS.</p>
+                            </div>
+                        </header>
+
+                        <div class="form-grid nip-grid--beneficiary">
+                            <div class="field" data-field="beneficiaryName">
+                                <label class="field__label" for="nip-beneficiary-name">Nome completo <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <input class="field__input field__input--plain" id="nip-beneficiary-name" name="beneficiaryName" type="text"
+                                           maxlength="150" autocomplete="off" required
+                                           aria-describedby="nip-beneficiary-name-error">
+                                </div>
+                                <p class="field__error" id="nip-beneficiary-name-error" data-field-error hidden></p>
+                            </div>
+
+                            <div class="field" data-field="beneficiaryCpf">
+                                <label class="field__label" for="nip-beneficiary-cpf">CPF <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <input class="field__input field__input--plain nip-input--mono" id="nip-beneficiary-cpf" name="beneficiaryCpf" type="text"
+                                           inputmode="numeric" maxlength="14" placeholder="000.000.000-00" autocomplete="off" required
+                                           aria-describedby="nip-beneficiary-cpf-error">
+                                </div>
+                                <p class="field__error" id="nip-beneficiary-cpf-error" data-field-error hidden></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 3. Classificação ------------------------------------------------ -->
+                    <section class="nip-section" aria-labelledby="secao-classificacao">
+                        <header class="nip-section__head">
+                            <span class="nip-section__step" aria-hidden="true">3</span>
+                            <div>
+                                <h2 class="nip-section__title" id="secao-classificacao">Classificação</h2>
+                                <p class="nip-section__description">Natureza da demanda e situação atual da NIP.</p>
+                            </div>
+                        </header>
+
+                        <!-- Falha ao carregar naturezas/status: o envio fica bloqueado até recarregar -->
+                        <div class="empty empty--error nip-lookups-error" data-lookups-error hidden>
+                            <span class="empty__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></span>
+                            <p class="empty__title">Não foi possível carregar as opções</p>
+                            <p class="empty__text" data-lookups-error-text></p>
+                            <button class="btn btn--secondary btn--sm" type="button" data-lookups-retry>Tentar novamente</button>
+                        </div>
+
+                        <div class="form-grid" data-lookups>
+                            <fieldset class="field field--full nip-natures" data-field="natureId">
+                                <legend class="field__label">Natureza <span class="field__required" aria-hidden="true">*</span></legend>
+                                <div class="nature-options" data-natures aria-describedby="nip-nature-error">
+                                    <span class="skeleton nature-option--skeleton"></span>
+                                    <span class="skeleton nature-option--skeleton"></span>
+                                </div>
+                                <p class="field__error" id="nip-nature-error" data-field-error hidden></p>
+                            </fieldset>
+
+                            <div class="field field--full" data-field="statusId">
+                                <label class="field__label" for="nip-status">Status <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <select class="field__input field__input--plain field__input--select" id="nip-status" name="statusId"
+                                            required disabled aria-describedby="nip-status-help nip-status-error">
+                                        <option value="">Carregando status...</option>
+                                    </select>
+                                </div>
+                                <p class="field__help nip-status-help" id="nip-status-help" data-status-help hidden></p>
+                                <p class="field__error" id="nip-status-error" data-field-error hidden></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 4. Descrições --------------------------------------------------- -->
+                    <section class="nip-section" aria-labelledby="secao-descricoes">
+                        <header class="nip-section__head">
+                            <span class="nip-section__step" aria-hidden="true">4</span>
+                            <div>
+                                <h2 class="nip-section__title" id="secao-descricoes">Descrições</h2>
+                                <p class="nip-section__description">Contexto da reclamação e o que a operadora respondeu. Podem ficar em branco por enquanto.</p>
+                            </div>
+                        </header>
+
+                        <div class="form-grid">
+                            <div class="field field--full" data-field="description">
+                                <div class="nip-field-head">
+                                    <label class="field__label" for="nip-description">Descrição da demanda <span class="field__optional">(opcional)</span></label>
+                                    <span class="nip-counter" data-counter-for="description" aria-hidden="true"></span>
+                                </div>
+                                <div class="field__control">
+                                    <textarea class="field__input field__input--plain field__input--textarea" id="nip-description" name="description"
+                                              rows="4" maxlength="5000" placeholder="Resumo do que o beneficiário relatou"
+                                              aria-describedby="nip-description-error"></textarea>
+                                </div>
+                                <p class="field__error" id="nip-description-error" data-field-error hidden></p>
+                            </div>
+
+                            <div class="field field--full" data-field="responseDescription">
+                                <div class="nip-field-head">
+                                    <label class="field__label" for="nip-response">Resposta da operadora <span class="field__optional">(opcional)</span></label>
+                                    <span class="nip-counter" data-counter-for="responseDescription" aria-hidden="true"></span>
+                                </div>
+                                <div class="field__control">
+                                    <textarea class="field__input field__input--plain field__input--textarea" id="nip-response" name="responseDescription"
+                                              rows="4" maxlength="5000" placeholder="Providências tomadas e posicionamento enviado à ANS"
+                                              aria-describedby="nip-response-error"></textarea>
+                                </div>
+                                <p class="field__error" id="nip-response-error" data-field-error hidden></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Ações: barra fixa no rodapé do card enquanto o formulário rola -->
+                    <footer class="nip-form__actions">
+                        <p class="nip-form__progress" data-progress-compact aria-hidden="true"></p>
+                        <p class="nip-form__hint"><span class="field__required" aria-hidden="true">*</span> Campos obrigatórios</p>
+                        <div class="nip-form__buttons">
+                            <button class="btn btn--secondary" type="button" data-clear>Limpar</button>
+                            <button class="btn btn--primary" type="submit" data-submit disabled>
+                                <span class="btn__spinner" aria-hidden="true" hidden></span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-submit-icon><path d="M20 6 9 17l-5-5"/></svg>
+                                <span data-submit-label>Registrar NIP</span>
+                            </button>
+                        </div>
+                    </footer>
+                </form>
+            </section>
+
+            <!-- Resumo ao vivo (só em telas largas) -->
+            <aside class="nip-aside" aria-label="Resumo da NIP">
+                <section class="card nip-summary">
+                    <header class="nip-summary__head">
+                        <h2 class="nip-summary__title">Resumo</h2>
+                        <span class="nip-summary__count" data-progress-text></span>
+                    </header>
+                    <div class="nip-meter" role="progressbar" aria-label="Campos obrigatórios preenchidos"
+                         aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" data-progress-bar>
+                        <span class="nip-meter__fill" data-progress-fill></span>
+                    </div>
+
+                    <div class="nip-summary__hero">
+                        <p class="nip-summary__label">NIP</p>
+                        <p class="nip-summary__number" data-summary="nipNumber"></p>
+                        <div class="nip-summary__badges">
+                            <span class="badge badge--outline badge--plain" data-summary="natureId"></span>
+                        </div>
+                    </div>
+
+                    <dl class="nip-summary__list">
+                        <div><dt>Notificação</dt><dd data-summary="notificationDate"></dd></div>
+                        <div><dt>Protocolo</dt><dd data-summary="protocolCode"></dd></div>
+                        <div><dt>Demanda</dt><dd data-summary="demandCode"></dd></div>
+                        <div><dt>Beneficiário</dt><dd data-summary="beneficiaryName"></dd></div>
+                        <div><dt>CPF</dt><dd data-summary="beneficiaryCpf"></dd></div>
+                        <div><dt>Status</dt><dd data-summary="statusId"></dd></div>
+                    </dl>
+                </section>
+
+                <section class="nip-tips" aria-labelledby="dicas-title">
+                    <h2 class="nip-tips__title" id="dicas-title">Antes de registrar</h2>
+                    <ul class="nip-tips__list">
+                        <li>Número e protocolo são únicos: o sistema avisa se já existir uma NIP com eles.</li>
+                        <li>O CPF é validado pelos dígitos verificadores e salvo só com números.</li>
+                        <li>A data de notificação não pode ser futura.</li>
+                    </ul>
+                </section>
+            </aside>
+        </div>
+
+        <!-- Confirmação após registrar -->
+        <section class="card nip-success" data-success hidden aria-labelledby="sucesso-title">
+            <span class="nip-success__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <h2 class="nip-success__title" id="sucesso-title" tabindex="-1">NIP registrada com sucesso</h2>
+            <p class="nip-success__text" data-success-text></p>
+
+            <dl class="nip-success__list" data-success-list></dl>
+
+            <div class="nip-success__actions">
+                <a class="btn btn--secondary" th:href="@{/home}">Voltar ao início</a>
+                <button class="btn btn--primary" type="button" data-register-another>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Registrar outra NIP</span>
+                </button>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<script type="module" th:src="@{/js/nips/register.js}"></script>
+</body>
+</html>
