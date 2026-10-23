@@ -1,7 +1,8 @@
 /* ==========================================================================
-   nips.css — tela NIP's › Registrar NIP: formulário em seções numeradas,
+   nips.css — telas de NIP's. Registrar NIP: formulário em seções numeradas,
    natureza em cards de rádio, barra de ações fixa, resumo ao vivo e painel
-   de confirmação. Só consome tokens.
+   de confirmação. Controlar NIP's: células da listagem e status (no fim do
+   arquivo). Só consome tokens.
    ========================================================================== */
 
 /* Layout ------------------------------------------------------------------ */
@@ -327,4 +328,56 @@
 
 @media (max-width: 480px) {
   .nature-options { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ==========================================================================
+   NIP's › Controlar NIP's: células da listagem, status e o filtro rápido de
+   situação. Cabeçalho, indicadores, painel e paginação vêm de components.css.
+   ========================================================================== */
+
+/* Status: em andamento (azul) e finalizada (verde, badge--success) */
+.badge--progress { background: var(--color-pillar-s-bg); color: var(--color-pillar-s); }
+
+/* Nomes de status longos ("Aguardando Classificação da Demanda NIP - RN388") quebram
+   dentro da própria coluna em vez de invadir a vizinha */
+.badge--status {
+  align-items: flex-start;
+  max-width: 100%;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.badge--status::before { flex: none; margin-top: 0.42em; }
+.nips-table .badge--status { max-width: 240px; }
+.kpi--progress .kpi__icon { background: var(--color-pillar-s-bg); color: var(--color-pillar-s); }
+
+.cell-nip { display: grid; min-width: 130px; }
+.cell-nip__number { font-weight: 700; color: var(--color-text); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; white-space: nowrap; }
+.cell-nip__meta {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.cell-person { display: grid; min-width: 160px; max-width: 280px; }
+.cell-person__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; color: var(--color-text); }
+.cell-person__meta { font-size: var(--text-xs); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+
+/* Barra acima da tabela: contagem à esquerda e situação à direita */
+.list-panel__bar:has(.nips-scope) { flex-wrap: wrap; }
+
+/* Telas médias: a coluna de auditoria sai para a tabela caber sem rolagem (volta no modo card) */
+@media (max-width: 1100px) and (min-width: 641px) {
+  .nips-table .nips-col-updated { display: none; }
+}
+
+@media (max-width: 640px) {
+  .nips-scope { display: flex; width: 100%; }
+  .nips-scope .segmented__option { flex: 1; padding: 0 var(--space-2); }
+  .cell-nip__meta,
+  .cell-person { max-width: none; }
+  .cell-person__name { white-space: normal; }
 }

@@ -10,8 +10,9 @@
 import '../shell.js';
 import { api } from '../api.js';
 import { confirmModal } from '../modal.js';
-import { toast, setFieldError, clearFieldErrors, clearErrorOnInput } from '../ui.js';
+import { toast, setFieldError, clearFieldErrors, clearErrorOnInput, applyMask } from '../ui.js';
 import { todayIso, formatDay, dateTimeFormat } from '../format.js';
+import { onlyDigits, formatNipNumber, formatCpf, isValidCpf, isFinished } from './nip-format.js';
 
 const ENDPOINT = 'api/nips';
 const SUBMIT_LABEL = 'Registrar NIP';
@@ -165,10 +166,6 @@ function renderStatuses() {
     renderStatusHelp();
 }
 
-function isFinished(status) {
-    return status.name.trim().toLowerCase().startsWith('finalizada');
-}
-
 function renderStatusHelp() {
     const status = findById(state.statuses, statusSelect.value);
     statusHelp.textContent = status?.description ?? '';
@@ -180,46 +177,6 @@ function findById(rows, id) {
 }
 
 /* Máscaras (número da NIP e CPF) ------------------------------------------- */
-
-function onlyDigits(value) {
-    return String(value ?? '').replace(/\D/g, '');
-}
-
-// "0012342026" -> "001234/2026" (aceita parcial enquanto digita)
-function formatNipNumber(value) {
-    return onlyDigits(value).slice(0, 10).replace(/^(\d{6})(\d)/, '$1/$2');
-}
-
-// "12345678901" -> "123.456.789-01" (aceita parcial enquanto digita)
-function formatCpf(value) {
-    return onlyDigits(value).slice(0, 11)
-        .replace(/^(\d{3})(\d)/, '$1.$2')
-        .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
-        .replace(/\.(\d{3})(\d)/, '.$1-$2');
-}
-
-function isValidCpf(digits) {
-    if (!/^\d{11}$/.test(digits) || /^(\d)\1{10}$/.test(digits)) return false;
-    for (const length of [9, 10]) {
-        let sum = 0;
-        for (let i = 0; i < length; i++) sum += Number(digits[i]) * (length + 1 - i);
-        if ((sum * 10) % 11 % 10 !== Number(digits[length])) return false;
-    }
-    return true;
-}
-
-// Aplica a máscara mantendo o cursor depois do mesmo dígito
-function applyMask(input, format) {
-    const caret = input.selectionStart ?? input.value.length;
-    const digitsBefore = onlyDigits(input.value.slice(0, caret)).length;
-    input.value = format(input.value);
-
-    let position = 0;
-    for (let seen = 0; position < input.value.length && seen < digitsBefore; position++) {
-        if (/\d/.test(input.value[position])) seen++;
-    }
-    input.setSelectionRange(position, position);
-}
 
 function validateMaskedOnBlur(field) {
     const digits = readValue(field);

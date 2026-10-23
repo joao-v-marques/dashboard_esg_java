@@ -144,7 +144,7 @@
                     </li>
                 </ul>
             </li>
-            <li class="sidebar__group" th:with="inNips=${active == 'nips-register'}" data-requires-role="EMPLOYEE_LEGAL" hidden>
+            <li class="sidebar__group" th:with="inNips=${active == 'nips' or active == 'nips-register'}" data-requires-role="EMPLOYEE_LEGAL" hidden>
                 <button class="sidebar__link sidebar__group-toggle" type="button" data-nav-group
                         aria-controls="nav-nips"
                         th:classappend="${inNips} ? 'has-active'"
@@ -154,6 +154,11 @@
                     <svg class="sidebar__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
                 <ul class="sidebar__sublist" id="nav-nips" th:attr="hidden=${inNips} ? null : 'hidden'">
+                    <li>
+                        <a class="sidebar__sublink" th:href="@{/nips}"
+                           th:classappend="${active == 'nips'} ? 'is-active'"
+                           th:attr="aria-current=${active == 'nips'} ? 'page' : null">Controlar NIP's</a>
+                    </li>
                     <li>
                         <a class="sidebar__sublink" th:href="@{/nips/register}"
                            th:classappend="${active == 'nips-register'} ? 'is-active'"

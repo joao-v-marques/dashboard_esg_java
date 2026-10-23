@@ -21,13 +21,13 @@
 <main class="app-main" id="conteudo">
     <div class="page page--wide">
 
-        <header class="page-head wastes-head">
-            <div class="wastes-head__text">
+        <header class="page-head page-head--split">
+            <div class="page-head__text">
                 <p class="page-head__eyebrow">Ambiental · Resíduos</p>
                 <h1 class="page-head__title">Controlar Resíduos</h1>
                 <p class="page-head__subtitle">Registre a pesagem diária de resíduos por unidade e acompanhe o volume gerado.</p>
             </div>
-            <button class="btn btn--primary wastes-head__action" type="button" data-new disabled>
+            <button class="btn btn--primary page-head__action" type="button" data-new disabled>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
                 <span>Novo registro</span>
             </button>
@@ -64,13 +64,13 @@
             </article>
         </section>
 
-        <section class="card wastes-panel" aria-labelledby="registros-title">
-            <header class="wastes-panel__header">
+        <section class="card list-panel" aria-labelledby="registros-title">
+            <header class="list-panel__header">
                 <div>
-                    <h2 class="wastes-panel__title" id="registros-title">Registros</h2>
-                    <p class="wastes-panel__description">Histórico de pesagens. Use os filtros para analisar um período, unidade ou tipo.</p>
+                    <h2 class="list-panel__title" id="registros-title">Registros</h2>
+                    <p class="list-panel__description">Histórico de pesagens. Use os filtros para analisar um período, unidade ou tipo.</p>
                 </div>
-                <button class="btn btn--secondary btn--sm wastes-panel__filters-toggle" type="button"
+                <button class="btn btn--secondary btn--sm list-panel__filters-toggle" type="button"
                         data-filters-toggle aria-expanded="false" aria-controls="wastes-filters">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3H2l8 9.5V19l4 2v-8.5Z"/></svg>
                     <span data-filters-toggle-label>Filtros</span>
@@ -110,11 +110,11 @@
                 </div>
             </form>
 
-            <div class="wastes-panel__bar">
-                <p class="wastes-panel__count" data-results aria-live="polite"></p>
+            <div class="list-panel__bar">
+                <p class="list-panel__count" data-results aria-live="polite"></p>
             </div>
 
-            <div class="wastes-panel__table" data-table></div>
+            <div class="list-panel__table" data-table></div>
 
             <nav class="pager" aria-label="Paginação dos registros" data-pager hidden>
                 <button class="icon-btn" type="button" data-page="prev" aria-label="Página anterior">

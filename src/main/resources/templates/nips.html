@@ -1,0 +1,140 @@
+<!doctype html>
+<!--
+  NIP's › Controlar NIP's.
+  Indicadores no topo e a lista de NIP's com filtros; detalhes e edição em modal.
+  Tudo é montado por js/nips/nips.js a partir de GET /api/nips, /api/nip-status
+  e /api/nip-natures.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: appHead('Controlar NIP’s')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/nips.css}">
+</head>
+
+<body>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header th:replace="~{fragments/layout :: topbar}"></header>
+<aside th:replace="~{fragments/layout :: sidebar('nips')}"></aside>
+<div class="sidebar-scrim" data-sidebar-scrim hidden></div>
+
+<main class="app-main" id="conteudo">
+    <div class="page page--wide">
+
+        <header class="page-head page-head--split">
+            <div class="page-head__text">
+                <p class="page-head__eyebrow">Governança · NIP's</p>
+                <h1 class="page-head__title">Controlar NIP's</h1>
+                <p class="page-head__subtitle">Acompanhe as Notificações de Intermediação Preliminar registradas, consulte os detalhes e atualize o andamento de cada uma.</p>
+            </div>
+            <a class="btn btn--primary page-head__action" th:href="@{/nips/register}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                <span>Registrar NIP</span>
+            </a>
+        </header>
+
+        <!-- Indicadores: refletem os filtros aplicados -->
+        <section class="kpis" aria-label="Indicadores das NIP's filtradas" data-kpis>
+            <article class="card kpi">
+                <span class="kpi__icon" data-kpi-icon="list"></span>
+                <p class="kpi__label">NIP's</p>
+                <p class="kpi__value" data-kpi="total"><span class="skeleton skeleton--line" style="width: 48px"></span></p>
+                <p class="kpi__hint" data-kpi-hint="total"></p>
+            </article>
+            <article class="card kpi kpi--progress">
+                <span class="kpi__icon" data-kpi-icon="clock"></span>
+                <p class="kpi__label">Em andamento</p>
+                <p class="kpi__value" data-kpi="open"><span class="skeleton skeleton--line" style="width: 48px"></span></p>
+                <p class="kpi__hint" data-kpi-hint="open"></p>
+            </article>
+            <article class="card kpi">
+                <span class="kpi__icon" data-kpi-icon="check"></span>
+                <p class="kpi__label">Finalizadas</p>
+                <p class="kpi__value" data-kpi="finished"><span class="skeleton skeleton--line" style="width: 64px"></span></p>
+                <div class="meter" role="img" data-kpi-meter aria-label="Proporção finalizada">
+                    <span class="meter__fill" data-kpi-meter-fill></span>
+                </div>
+                <p class="kpi__hint" data-kpi-hint="finished"></p>
+            </article>
+            <article class="card kpi">
+                <span class="kpi__icon" data-kpi-icon="calendar"></span>
+                <p class="kpi__label">NIP's este ano</p>
+                <p class="kpi__value" data-kpi="year"><span class="skeleton skeleton--line" style="width: 48px"></span></p>
+                <p class="kpi__hint" data-kpi-hint="year"></p>
+            </article>
+        </section>
+
+        <section class="card list-panel" aria-labelledby="nips-title">
+            <header class="list-panel__header">
+                <div>
+                    <h2 class="list-panel__title" id="nips-title">NIP's registradas</h2>
+                    <p class="list-panel__description">Busque por número, protocolo, demanda ou beneficiário e filtre por status, natureza ou período de notificação.</p>
+                </div>
+                <button class="btn btn--secondary btn--sm list-panel__filters-toggle" type="button"
+                        data-filters-toggle aria-expanded="false" aria-controls="nips-filters">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3H2l8 9.5V19l4 2v-8.5Z"/></svg>
+                    <span data-filters-toggle-label>Filtros</span>
+                </button>
+            </header>
+
+            <form class="filters" id="nips-filters" data-filters role="search" aria-label="Filtrar NIP's">
+                <div class="filters__field filters__field--search">
+                    <label class="filters__label" for="filter-search">Buscar</label>
+                    <div class="search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                        <input type="search" id="filter-search" name="search" autocomplete="off" placeholder="Número, protocolo, demanda, beneficiário ou CPF">
+                    </div>
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-status">Status</label>
+                    <select class="filters__select field__input--select" id="filter-status" name="status">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-nature">Natureza</label>
+                    <select class="filters__select field__input--select" id="filter-nature" name="nature">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-from">Notificada de</label>
+                    <input class="filters__select" type="date" id="filter-from" name="from">
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-to">Até</label>
+                    <input class="filters__select" type="date" id="filter-to" name="to">
+                </div>
+                <div class="filters__actions">
+                    <button class="btn btn--secondary btn--sm" type="reset" data-filters-clear disabled>Limpar filtros</button>
+                </div>
+            </form>
+
+            <div class="list-panel__bar">
+                <p class="list-panel__count" data-results aria-live="polite"></p>
+                <div class="nips-scope segmented" role="group" aria-label="Situação" data-scope>
+                    <button class="segmented__option" type="button" data-scope-value="" aria-pressed="true">Todas</button>
+                    <button class="segmented__option" type="button" data-scope-value="open" aria-pressed="false">Em andamento</button>
+                    <button class="segmented__option" type="button" data-scope-value="finished" aria-pressed="false">Finalizadas</button>
+                </div>
+            </div>
+
+            <div class="list-panel__table nips-table" data-table></div>
+
+            <nav class="pager" aria-label="Paginação das NIP's" data-pager hidden>
+                <button class="icon-btn" type="button" data-page="prev" aria-label="Página anterior">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <span class="pager__status" data-page-status></span>
+                <button class="icon-btn" type="button" data-page="next" aria-label="Próxima página">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+            </nav>
+        </section>
+
+    </div>
+</main>
+
+<script type="module" th:src="@{/js/nips/nips.js}"></script>
+</body>
+</html>

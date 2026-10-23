@@ -6,12 +6,20 @@
      vão para baixo de cada campo e a `message` para o alerta do topo, e o
      modal continua aberto. Resolve true quando salvou, false se cancelou.
    - confirmModal: confirmação de uma ação (ex.: desativar), mesmo contrato.
+   - detailModal: leitura de um registro em seções de rótulo/valor, com uma
+     ação opcional no rodapé (ex.: "Editar"). Resolve com o id da ação
+     escolhida ou false se fechou.
+
+   Campos do formulário aceitam, além do básico: `mask: { format, parse }`
+   (máscara de dígitos; o valor lido é parse(texto)), `validate(value)`
+   (regra extra, devolve a mensagem ou null), `counter` em textarea com
+   maxLength e, em select, grupos `{ group, options }` (viram <optgroup>).
 
    Todo texto vindo da API entra via textContent, nunca innerHTML.
    ========================================================================== */
 
 import { ICONS } from './icons.js';
-import { setFieldError, clearFieldErrors, clearErrorOnInput } from './ui.js';
+import { setFieldError, clearFieldErrors, clearErrorOnInput, applyMask } from './ui.js';
 
 let uid = 0;
 
@@ -93,6 +101,17 @@ function setBusy(button, busy, busyLabel, idleLabel) {
     button.lastElementChild.textContent = busy ? busyLabel : idleLabel;
 }
 
+// Trava a rolagem da página enquanto houver modal aberto (contador para modais empilhados)
+let openModals = 0;
+
+function lockScroll() {
+    if (openModals++ === 0) document.documentElement.classList.add('is-modal-open');
+}
+
+function unlockScroll() {
+    if (--openModals === 0) document.documentElement.classList.remove('is-modal-open');
+}
+
 /**
  * Abre o dialog e controla fechamento. `run` recebe a função `finish(result)`.
  */
@@ -104,6 +123,7 @@ function present(shell, run) {
         const finish = (result) => {
             dialog.close();
             dialog.remove();
+            unlockScroll();
             resolve(result);
         };
 
@@ -121,6 +141,7 @@ function present(shell, run) {
         });
 
         document.body.append(dialog);
+        lockScroll();
         dialog.showModal();
 
         run({
@@ -136,7 +157,7 @@ function present(shell, run) {
 
 function buildField(field, value) {
     const id = `f-${field.name}-${++uid}`;
-    const wrapper = el('div', `field${field.full ? ' field--full' : ''}`);
+    const wrapper = el('div', `field${field.full ? ' field--full' : ''}${field.span ? ` field--span-${field.span}` : ''}`);
     wrapper.dataset.field = field.name;
 
     const label = el('label', 'field__label', field.label);
@@ -151,10 +172,20 @@ function buildField(field, value) {
         const placeholder = el('option', null, field.placeholder ?? 'Selecione...');
         placeholder.value = '';
         input.append(placeholder);
-        (field.options ?? []).forEach((option) => {
+        const optionNode = (option) => {
             const node = el('option', null, option.label);
             node.value = String(option.value);
-            input.append(node);
+            return node;
+        };
+        (field.options ?? []).forEach((option) => {
+            if (!option.group) {
+                input.append(optionNode(option));
+                return;
+            }
+            const group = el('optgroup');
+            group.label = option.group;
+            option.options.forEach((child) => group.append(optionNode(child)));
+            input.append(group);
         });
         input.value = value !== undefined && value !== null && input.querySelector(`option[value="${CSS.escape(String(value))}"]`)
             ? String(value)
@@ -168,7 +199,11 @@ function buildField(field, value) {
     } else {
         input = el('input', 'field__input field__input--plain');
         input.type = field.type ?? 'text';
-        input.value = value ?? '';
+        input.value = field.mask && value ? field.mask.format(value) : (value ?? '');
+        if (field.mask) {
+            input.inputMode = 'numeric';
+            input.addEventListener('input', () => applyMask(input, field.mask.format));
+        }
         if (field.placeholder) input.placeholder = field.placeholder;
         if (field.maxLength) input.maxLength = field.maxLength;
         if (field.autocomplete) input.autocomplete = field.autocomplete;
@@ -217,7 +252,23 @@ function buildField(field, value) {
     error.dataset.fieldError = '';
     error.hidden = true;
 
-    wrapper.append(label, control);
+    // Contador "x / máx." alinhado à direita do rótulo
+    let head = label;
+    if (field.counter && field.maxLength) {
+        head = el('div', 'field__label-row');
+        const counter = el('span', 'field__counter');
+        counter.setAttribute('aria-hidden', 'true');
+        const update = () => {
+            const length = input.value.length;
+            counter.textContent = `${length.toLocaleString('pt-BR')} / ${field.maxLength.toLocaleString('pt-BR')}`;
+            counter.classList.toggle('is-near', length >= field.maxLength * 0.9);
+        };
+        input.addEventListener('input', update);
+        update();
+        head.append(label, counter);
+    }
+
+    wrapper.append(head, control);
     if (field.help) wrapper.append(el('p', 'field__help', field.help));
     wrapper.append(error);
     return wrapper;
@@ -225,6 +276,7 @@ function buildField(field, value) {
 
 function readValue(form, field) {
     const raw = form.elements[field.name].value;
+    if (field.mask) return field.mask.parse(raw) || null;
     const value = field.type === 'password' ? raw : raw.trim();
     if (value === '') {
         // Um number com texto inválido chega vazio em .value: marca para a validação não tratar como "não preenchido"
@@ -255,7 +307,7 @@ function validateField(field, value) {
     if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
         return 'Informe um e-mail válido.';
     }
-    return null;
+    return field.validate?.(value) ?? null;
 }
 
 /* ---------------------------------------------------------------------------
@@ -264,12 +316,13 @@ function validateField(field, value) {
 
 export function openFormModal({
     title, description, iconName, fields, values = {}, submitLabel = 'Salvar',
-    busyLabel = 'Salvando...', size = 'md', onSubmit,
+    busyLabel = 'Salvando...', size = 'md', columns = 2, onSubmit,
 }) {
     const shell = createShell({ title, description, size, iconName });
     const { form, body, footer, alert } = shell;
 
-    const grid = el('div', 'form-grid');
+    // columns: 4 para modais largos (xl); cada campo ocupa `span` colunas
+    const grid = el('div', `form-grid${columns === 4 ? ' form-grid--4' : ''}`);
     fields.forEach((field) => grid.append(buildField(field, values[field.name])));
     body.append(grid);
     clearErrorOnInput(form);
@@ -363,5 +416,57 @@ export function confirmModal({
                 showAlert(alert, error.message);
             }
         });
+    });
+}
+
+/**
+ * sections: [{ title, full, columns, items: [{ label, value (texto ou nó), note, full, mono, long }] }]
+ *   No modal xl as seções ficam em duas colunas; `full` ocupa a linha inteira e
+ *   `columns` (2 a 4) define quantos pares rótulo/valor cabem lado a lado.
+ * actions:  [{ id, label, icon, variant }] — botões do rodapé ao lado de "Fechar"
+ */
+export function detailModal({
+    title, description, iconName, size = 'lg', sections = [], actions = [], emptyText = 'Não informado',
+}) {
+    const shell = createShell({ title, description, size, iconName });
+    const { form, body, footer } = shell;
+    body.classList.add('modal__body--sections');
+
+    sections.forEach((section) => {
+        const box = el('section', `detail-section${section.full ? ' detail-section--full' : ''}`);
+        if (section.title) box.append(el('h3', 'detail-section__title', section.title));
+        const list = el('dl', `detail-list${section.columns ? ` detail-list--${section.columns}` : ''}`);
+        section.items.forEach((item) => {
+            const row = el('div', item.full ? 'is-full' : '');
+            const dd = el('dd');
+            const empty = item.value === null || item.value === undefined || item.value === '';
+            if (empty) dd.textContent = emptyText;
+            else if (item.value instanceof Node) dd.append(item.value);
+            else dd.textContent = item.value;
+            dd.classList.toggle('is-empty', empty);
+            dd.classList.toggle('is-mono', Boolean(item.mono));
+            dd.classList.toggle('is-long', Boolean(item.long));
+            if (item.note && !empty) dd.append(el('span', 'detail-list__note', item.note));
+            row.append(el('dt', null, item.label), dd);
+            list.append(row);
+        });
+        box.append(list);
+        body.append(box);
+    });
+
+    const close = makeButton('Fechar', 'secondary');
+    footer.append(close);
+    const buttons = actions.map((action) => {
+        const button = makeButton(action.label, action.variant ?? 'primary');
+        if (action.icon) button.querySelector('.btn__spinner').after(iconNode(action.icon));
+        footer.append(button);
+        return [action, button];
+    });
+
+    return present(shell, ({ finish }) => {
+        close.addEventListener('click', () => finish(false));
+        buttons.forEach(([action, button]) => button.addEventListener('click', () => finish(action.id)));
+        form.addEventListener('submit', (event) => event.preventDefault());
+        close.focus();
     });
 }

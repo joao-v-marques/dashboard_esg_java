@@ -60,6 +60,19 @@ export function clearErrorOnInput(scope) {
     scope.addEventListener('change', handler);
 }
 
+// Aplica uma máscara de dígitos (CPF, número da NIP...) mantendo o cursor depois do mesmo dígito
+export function applyMask(input, format) {
+    const caret = input.selectionStart ?? input.value.length;
+    const digitsBefore = input.value.slice(0, caret).replace(/\D/g, '').length;
+    input.value = format(input.value);
+
+    let position = 0;
+    for (let seen = 0; position < input.value.length && seen < digitsBefore; position++) {
+        if (/\d/.test(input.value[position])) seen++;
+    }
+    input.setSelectionRange(position, position);
+}
+
 // Busca sem diferenciar acentos e maiúsculas ("joao" encontra "João")
 export function normalize(text) {
     return String(text ?? '')
