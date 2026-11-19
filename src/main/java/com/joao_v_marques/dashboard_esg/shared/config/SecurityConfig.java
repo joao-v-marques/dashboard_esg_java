@@ -54,6 +54,9 @@ public class SecurityConfig {
                         // Módulo de NIP's (telas e cadastros de NIP, status e natureza): EMPLOYEE_LEGAL e acima (MANAGER, ADMINISTRATOR)
                         .requestMatchers("/nips/**", "/api/nips/**", "/api/nip-status/**", "/api/nip-natures/**").hasRole(Role.EMPLOYEE_LEGAL)
 
+                        // Módulo de processos (cadastros de objeto, trâmite, status e probabilidade de perda): EMPLOYEE_LEGAL e acima (MANAGER, ADMINISTRATOR)
+                        .requestMatchers("/api/subject-matters/**", "/api/proceeding-stages/**", "/api/lawsuit-status/**", "/api/loss-probabilities/**").hasRole(Role.EMPLOYEE_LEGAL)
+
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
