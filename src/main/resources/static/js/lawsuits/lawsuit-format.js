@@ -25,23 +25,51 @@ export function caseNumberKey(value) {
     return digits.slice(9, 13) + digits.slice(0, 7);
 }
 
-const MAX_MONEY_DIGITS = 15; // NUMERIC(15, 2): 13 inteiros + 2 decimais
+const MAX_MONEY_INTEGER_DIGITS = 13; // NUMERIC(15, 2): 13 inteiros + 2 decimais
 const moneyInputFormat = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-// Máscara de moeda por centavos: cada dígito digitado entra pela direita ("5" -> "0,05", "1500000" -> "15.000,00").
+// Separa o texto digitado em parte inteira e centavos: a vírgula abre os centavos e os pontos
+// são de milhar (somem e voltam reagrupados), como no padrão brasileiro
+function splitMoney(text) {
+    const clean = String(text).replace(/[^\d,]/g, '');
+    const comma = clean.indexOf(',');
+    const integer = (comma === -1 ? clean : clean.slice(0, comma)).replace(/^0+(?=\d)/, '').slice(0, MAX_MONEY_INTEGER_DIGITS);
+    const cents = comma === -1 ? null : clean.slice(comma + 1).replace(/,/g, '').slice(0, 2);
+    return { integer, cents };
+}
+
+// Máscara de moeda enquanto digita: os dígitos entram como reais, com ponto de milhar
+// ("1500" -> "1.500"); a vírgula abre os centavos ("1500,5" -> "1.500,5").
 // Também aceita o número vindo da API (15000.5 -> "15.000,50")
 export function formatMoneyInput(value) {
     if (value === null || value === undefined || value === '') return '';
     if (typeof value === 'number') return Number.isFinite(value) ? moneyInputFormat.format(value) : '';
-    const digits = onlyDigits(value).replace(/^0+(?=\d)/, '').slice(0, MAX_MONEY_DIGITS);
-    return digits ? moneyInputFormat.format(Number(digits) / 100) : '';
+    const { integer, cents } = splitMoney(value);
+    const grouped = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    if (cents === null) return grouped;
+    return `${grouped || '0'},${cents}`;
+}
+
+// Ao sair do campo: completa os centavos ("1.500" -> "1.500,00", "1.500,5" -> "1.500,50")
+export function finalizeMoneyInput(text) {
+    const value = parseMoneyInput(text);
+    return value === null ? '' : moneyInputFormat.format(value);
 }
 
 // "15.000,50" -> 15000.5 (null se vazio)
 export function parseMoneyInput(text) {
-    const digits = onlyDigits(text);
-    return digits ? Number(digits) / 100 : null;
+    const { integer, cents } = splitMoney(text ?? '');
+    if (!integer && !cents) return null;
+    return Number(`${integer || '0'}.${(cents ?? '').padEnd(2, '0')}`);
 }
+
+// Configuração completa do campo de moeda (máscara, teclado com vírgula e acabamento no blur)
+export const MONEY_MASK = {
+    format: formatMoneyInput,
+    parse: parseMoneyInput,
+    finalize: finalizeMoneyInput,
+    inputMode: 'decimal',
+};
 
 // BigDecimal chega como número (ou texto, conforme a serialização)
 export const toAmount = (value) => {

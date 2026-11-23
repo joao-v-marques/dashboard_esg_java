@@ -61,14 +61,15 @@ export function clearErrorOnInput(scope) {
 }
 
 // Aplica uma máscara de dígitos (CPF, número da NIP...) mantendo o cursor depois do mesmo dígito
+// A vírgula conta junto com os dígitos para o cursor não pular para antes dela nas máscaras de moeda
 export function applyMask(input, format) {
     const caret = input.selectionStart ?? input.value.length;
-    const digitsBefore = input.value.slice(0, caret).replace(/\D/g, '').length;
+    const significantBefore = input.value.slice(0, caret).replace(/[^\d,]/g, '').length;
     input.value = format(input.value);
 
     let position = 0;
-    for (let seen = 0; position < input.value.length && seen < digitsBefore; position++) {
-        if (/\d/.test(input.value[position])) seen++;
+    for (let seen = 0; position < input.value.length && seen < significantBefore; position++) {
+        if (/[\d,]/.test(input.value[position])) seen++;
     }
     input.setSelectionRange(position, position);
 }

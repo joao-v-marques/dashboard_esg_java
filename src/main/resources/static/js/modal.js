@@ -205,8 +205,12 @@ function buildField(field, value) {
         const hasValue = value !== null && value !== undefined && value !== '';
         input.value = field.mask && hasValue ? field.mask.format(value) : (value ?? '');
         if (field.mask) {
-            input.inputMode = 'numeric';
+            input.inputMode = field.mask.inputMode ?? 'numeric';
             input.addEventListener('input', () => applyMask(input, field.mask.format));
+            // Acabamento opcional ao sair do campo (ex.: completar os centavos)
+            if (field.mask.finalize) {
+                input.addEventListener('blur', () => { input.value = field.mask.finalize(input.value); });
+            }
         }
         if (field.placeholder) input.placeholder = field.placeholder;
         if (field.maxLength) input.maxLength = field.maxLength;

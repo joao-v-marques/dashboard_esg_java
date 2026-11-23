@@ -18,7 +18,7 @@ import {
     intFormat, percentFormat, dateTimeFormat, currencyFormat, compactCurrencyFormat, todayIso, formatDay, weekday,
 } from '../format.js';
 import {
-    onlyDigits, formatCaseNumber, caseNumberKey, CASE_NUMBER_DIGITS, formatMoneyInput, parseMoneyInput,
+    onlyDigits, formatCaseNumber, caseNumberKey, CASE_NUMBER_DIGITS, MONEY_MASK,
     toAmount, riskTone, isProbable, ordinal,
 } from './lawsuit-format.js';
 
@@ -601,8 +601,8 @@ function lookupOptions(key, currentId = null) {
 
 function moneyField(name, label, extra = {}) {
     return {
-        name, label, required: true, prefix: 'R$', maxLength: 22, placeholder: '0,00',
-        mask: { format: formatMoneyInput, parse: parseMoneyInput },
+        name, label, required: true, prefix: 'R$', maxLength: 21, placeholder: '0,00',
+        mask: MONEY_MASK,
         validate: (value) => (value >= MAX_CLAIM_VALUE ? 'O valor deve ter no máximo 13 dígitos inteiros.' : null),
         ...extra,
     };
