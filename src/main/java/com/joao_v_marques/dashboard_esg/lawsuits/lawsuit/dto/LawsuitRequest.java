@@ -16,9 +16,9 @@ public record LawsuitRequest(
         @NotNull(message = "Informe a data do processo.")
         LocalDate lawsuitDate,
 
-        // Padrão CNJ: NNNNNNN-DD.AAAA.J.TR.OOOO (ex.: 0001234-56.2024.8.26.0100)
+        // Padrão CNJ (NNNNNNN-DD.AAAA.J.TR.OOOO) gravado só com os 20 dígitos (ex.: 00012345620248260100); a máscara fica no front
         @NotBlank(message = "Informe o número do processo.")
-        @Pattern(regexp = "\\d{7}-\\d{2}\\.\\d{4}\\.\\d\\.\\d{2}\\.\\d{4}", message = "O número do processo deve seguir o padrão CNJ: NNNNNNN-DD.AAAA.J.TR.OOOO.")
+        @Pattern(regexp = "\\d{20}", message = "O número do processo deve conter os 20 dígitos do padrão CNJ (somente números).")
         String caseNumber,
 
         @NotBlank(message = "Informe o autor do processo.")

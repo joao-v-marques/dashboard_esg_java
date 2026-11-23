@@ -615,7 +615,8 @@ function lawsuitFields(row) {
         {
             name: 'caseNumber', label: 'Número do processo', required: true, span: 2, maxLength: 25,
             placeholder: '0000000-00.0000.0.00.0000', help: 'Padrão CNJ: NNNNNNN-DD.AAAA.J.TR.OOOO',
-            mask: { format: formatCaseNumber, parse: (text) => formatCaseNumber(text) || null },
+            // Na tela fica com a máscara; para o backend vão só os 20 dígitos
+            mask: { format: formatCaseNumber, parse: onlyDigits },
             validate: (value) => (onlyDigits(value).length === CASE_NUMBER_DIGITS ? null : 'Informe os 20 dígitos do número do processo.'),
         },
         {
