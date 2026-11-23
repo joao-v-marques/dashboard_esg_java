@@ -166,6 +166,23 @@
                     </li>
                 </ul>
             </li>
+            <li class="sidebar__group" th:with="inLawsuits=${active == 'lawsuits'}" data-requires-role="EMPLOYEE_LEGAL" hidden>
+                <button class="sidebar__link sidebar__group-toggle" type="button" data-nav-group
+                        aria-controls="nav-lawsuits"
+                        th:classappend="${inLawsuits} ? 'has-active'"
+                        th:attr="aria-expanded=${inLawsuits} ? 'true' : 'false'">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 12.5-8 8a2.1 2.1 0 1 1-3-3l8-8"/><path d="m16 16 6-6M8 8l6-6M9 7l8 8M21 11l-8-8"/></svg>
+                    <span>Processos Jurídicos</span>
+                    <svg class="sidebar__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <ul class="sidebar__sublist" id="nav-lawsuits" th:attr="hidden=${inLawsuits} ? null : 'hidden'">
+                    <li>
+                        <a class="sidebar__sublink" th:href="@{/lawsuits}"
+                           th:classappend="${active == 'lawsuits'} ? 'is-active'"
+                           th:attr="aria-current=${active == 'lawsuits'} ? 'page' : null">Controlar Processos</a>
+                    </li>
+                </ul>
+            </li>
         </ul>
     </nav>
 
