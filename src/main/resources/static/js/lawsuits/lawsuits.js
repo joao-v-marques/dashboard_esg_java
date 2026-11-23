@@ -13,7 +13,7 @@ import { api, ApiError } from '../api.js';
 import { ICONS } from '../icons.js';
 import { openFormModal, detailModal, openCustomModal, mountFormFields } from '../modal.js';
 import { renderTable } from '../data-table.js';
-import { toast, normalize } from '../ui.js';
+import { toast, normalize, consumeQueryParam } from '../ui.js';
 import {
     intFormat, percentFormat, dateTimeFormat, currencyFormat, compactCurrencyFormat, todayIso, formatDay, weekday,
 } from '../format.js';
@@ -72,6 +72,9 @@ kpisEl.querySelectorAll('[data-kpi-icon]').forEach((box) => { box.innerHTML = IC
 inputs.from.max = todayIso();
 inputs.to.max = todayIso();
 
+// Vindo do registro (?destaque={id}): destaca o processo recém-cadastrado quando a lista carregar
+let pendingHighlight = Number(consumeQueryParam('destaque')) || null;
+
 bindFilters();
 pager.addEventListener('click', (event) => {
     const button = event.target.closest('[data-page]');
@@ -93,6 +96,10 @@ async function loadLawsuits() {
     try {
         const rows = await api.get(ENDPOINT);
         state.lawsuits = { status: 'ready', rows: Array.isArray(rows) ? rows : [] };
+        if (pendingHighlight) {
+            flashRow(pendingHighlight);
+            pendingHighlight = null;
+        }
     } catch (error) {
         // Num recarregamento após salvar, mantém o que já estava na tela
         state.lawsuits = previous.status === 'ready' ? previous : { status: 'error', rows: [], error: error.message };
