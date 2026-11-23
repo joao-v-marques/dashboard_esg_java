@@ -135,12 +135,13 @@ async function loadLookups() {
     renderList();
 }
 
-const byName = (a, b) => String(a.name).localeCompare(String(b.name), 'pt-BR');
-const lookup = (key) => state.lookups[key].rows;
-const findById = (rows, id) => rows.find((row) => row.id === id);
-const lookupsReady = () => Object.values(state.lookups).every((entry) => entry.status === 'ready');
-const isActiveRow = (row) => row.isActive !== false;
-const inactiveLabel = (row) => (isActiveRow(row) ? row.name : `${row.name} (inativo)`);
+// Helpers como funções declaradas (içadas): renderList() já roda na carga, antes desta linha
+function byName(a, b) { return String(a.name).localeCompare(String(b.name), 'pt-BR'); }
+function lookup(key) { return state.lookups[key].rows; }
+function findById(rows, id) { return rows.find((row) => row.id === id); }
+function lookupsReady() { return Object.values(state.lookups).every((entry) => entry.status === 'ready'); }
+function isActiveRow(row) { return row.isActive !== false; }
+function inactiveLabel(row) { return isActiveRow(row) ? row.name : `${row.name} (inativo)`; }
 
 function fillFilterSelect(select, rows) {
     rows.forEach((row) => {
