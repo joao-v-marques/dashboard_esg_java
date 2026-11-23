@@ -18,6 +18,7 @@ import com.joao_v_marques.dashboard_esg.users.user.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -101,6 +102,73 @@ public class LawsuitService {
         lawsuit.setInsertedBy(insertedBy);
 
         lawsuitRepository.save(lawsuit);
+
+        return toResponse(lawsuit);
+    }
+
+    @Transactional
+    public LawsuitResponse update(Integer lawsuitId, LawsuitRequest request, UserPrincipal currentUser) {
+        String caseNumber = request.caseNumber().trim();
+
+        // Confirmar se o processo editado realmente existe
+        Lawsuit lawsuit = lawsuitRepository.findById(lawsuitId)
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum processo com o ID informado."));
+
+        if (!lawsuit.isActive()) {
+            throw new IllegalArgumentException("Não é possível editar uma ocorrência inativa.");
+        }
+
+        // Validação de duplicidade, ignorando o próprio processo
+        if (lawsuitRepository.existsByCaseNumberAndIdNot(caseNumber, lawsuitId)) {
+            throw new ConflictException("Já existe outro processo cadastrado com este número.");
+        }
+
+        // Validação das FK: precisam existir e, se forem trocadas, estar ativas.
+        // Manter uma FK que já estava vinculada e foi inativada depois é permitido.
+
+        // Validação da FK de subjectMatter
+        SubjectMatter subjectMatter = subjectMatterRepository.findById(request.subjectMatterId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum objeto de processo com o ID informado."));
+        if (!subjectMatter.isActive() && !subjectMatter.getId().equals(lawsuit.getSubjectMatter().getId())) {
+            throw new IllegalArgumentException("O objeto de processo informado está inativo.");
+        }
+
+        // Validação da FK de proceedingStage
+        ProceedingStage proceedingStage = proceedingStageRepository.findById(request.proceedingStageId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum trâmite de processo com o ID informado."));
+        if (!proceedingStage.isActive() && !proceedingStage.getId().equals(lawsuit.getProceedingStage().getId())) {
+            throw new IllegalArgumentException("O trâmite de processo informado está inativo.");
+        }
+
+        // Validação da FK de status
+        LawsuitStatus status = lawsuitStatusRepository.findById(request.statusId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum status de processo com o ID informado."));
+        if (!status.isActive() && !status.getId().equals(lawsuit.getStatus().getId())) {
+            throw new IllegalArgumentException("O status de processo informado está inativo.");
+        }
+
+        // Validação da FK de lossProbability
+        LossProbability lossProbability = lossProbabilityRepository.findById(request.lossProbabilityId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrada nenhuma probabilidade de perda com o ID informado."));
+        if (!lossProbability.isActive() && !lossProbability.getId().equals(lawsuit.getLossProbability().getId())) {
+            throw new IllegalArgumentException("A probabilidade de perda informada está inativa.");
+        }
+
+        User updatedBy = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado usuário com o ID informado."));
+
+        // Atualizar a entidade já existente
+        lawsuit.setLawsuitDate(request.lawsuitDate());
+        lawsuit.setCaseNumber(caseNumber);
+        lawsuit.setPlaintiff(request.plaintiff().trim());
+        lawsuit.setDefendant(request.defendant().trim());
+        lawsuit.setClaimValue(request.claimValue());
+        lawsuit.setSubjectMatter(subjectMatter);
+        lawsuit.setProceedingStage(proceedingStage);
+        lawsuit.setStatus(status);
+        lawsuit.setLossProbability(lossProbability);
+        lawsuit.setUpdatedAt(OffsetDateTime.now());
+        lawsuit.setUpdatedBy(updatedBy);
 
         return toResponse(lawsuit);
     }

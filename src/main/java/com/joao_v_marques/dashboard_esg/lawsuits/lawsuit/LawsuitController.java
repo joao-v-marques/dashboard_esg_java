@@ -41,4 +41,12 @@ public class LawsuitController {
 
         return ResponseEntity.created(location).body(created);
     }
+
+    // PUT de um processo já existente
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<LawsuitResponse> update(@PathVariable Integer id, @Valid @RequestBody LawsuitRequest request, @AuthenticationPrincipal UserPrincipal currentUser) {
+        LawsuitResponse updated = service.update(id, request, currentUser);
+
+        return ResponseEntity.ok(updated);
+    }
 }

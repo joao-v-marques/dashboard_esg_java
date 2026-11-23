@@ -13,4 +13,7 @@ public interface LawsuitRepository extends JpaRepository<Lawsuit, Integer> {
     List<Lawsuit> findAll();
 
     boolean existsByCaseNumber(String caseNumber);
+
+    // Usado no PUT, para validar duplicidade ignorando o próprio processo editado
+    boolean existsByCaseNumberAndIdNot(String caseNumber, Integer id);
 }
