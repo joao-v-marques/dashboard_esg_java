@@ -19,6 +19,56 @@ export function formatCaseNumber(value) {
     return parts.reduce((text, part, index) => (part ? text + (index ? separators[index - 1] : '') + part : text), '');
 }
 
+// Dígito verificador (DD) do número CNJ: módulo 97 (ISO 7064), Res. CNJ 65/2008.
+// Reordenado como NNNNNNN AAAA J TR OOOO DD, o número completo dá resto 1 na divisão por 97
+export function isValidCaseNumber(value) {
+    const digits = onlyDigits(value);
+    if (digits.length !== CASE_NUMBER_DIGITS) return false;
+    const reordered = digits.slice(0, 7) + digits.slice(9) + digits.slice(7, 9);
+    return BigInt(reordered) % 97n === 1n;
+}
+
+// Códigos TR dos tribunais estaduais/eleitorais, na ordem do CNJ
+const UFS = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SE', 'SP', 'TO'];
+
+const SEGMENTS = {
+    1: 'Supremo Tribunal Federal',
+    2: 'Conselho Nacional de Justiça',
+    3: 'Superior Tribunal de Justiça',
+    4: 'Justiça Federal',
+    5: 'Justiça do Trabalho',
+    6: 'Justiça Eleitoral',
+    7: 'Justiça Militar da União',
+    8: 'Justiça Estadual',
+    9: 'Justiça Militar Estadual',
+};
+
+function tribunalName(segment, code) {
+    const number = Number(code);
+    const uf = UFS[number - 1];
+    if (segment === '8' && uf) return uf === 'DF' ? 'TJDFT' : `TJ${uf}`;
+    if (segment === '6' && uf) return `TRE-${uf}`;
+    if (segment === '9' && uf) return `TJM-${uf}`;
+    if (segment === '4' && number) return `TRF da ${number}ª Região`;
+    if (segment === '5') return number ? `TRT da ${number}ª Região` : 'TST';
+    return `Tribunal ${code}`;
+}
+
+// Lê o número CNJ conforme é digitado: cada parte aparece quando estiver completa (null antes disso)
+export function describeCaseNumber(value) {
+    const digits = onlyDigits(value).slice(0, CASE_NUMBER_DIGITS);
+    const year = digits.length >= 13 ? digits.slice(9, 13) : null;
+    const segment = digits.length >= 14 ? digits[13] : null;
+    const tribunal = digits.length >= 16 ? digits.slice(14, 16) : null;
+    const origin = digits.length === CASE_NUMBER_DIGITS ? digits.slice(16, 20) : null;
+    return [
+        { key: 'year', label: 'Ano', value: year },
+        { key: 'segment', label: 'Justiça', value: segment && (SEGMENTS[segment] ?? `Segmento ${segment}`) },
+        { key: 'tribunal', label: 'Tribunal', value: segment && tribunal && tribunalName(segment, tribunal) },
+        { key: 'origin', label: 'Origem', value: origin && (origin === '0000' ? 'No próprio tribunal' : `Unidade ${origin}`) },
+    ];
+}
+
 // Ordena pelo ano do processo e depois pelo número sequencial
 export function caseNumberKey(value) {
     const digits = onlyDigits(value);
@@ -86,6 +136,13 @@ export function riskTone(name) {
 }
 
 export const isProbable = (row) => riskTone(row.lossProbabilityName) === 'probable';
+
+// Apoio à escolha da probabilidade de perda (critério contábil usual para contingências)
+export const RISK_HINTS = {
+    probable: 'A perda é mais provável do que não. O valor em causa costuma ser provisionado.',
+    remote: 'A chance de perda é pequena. Não exige provisão nem divulgação.',
+    neutral: null,
+};
 
 // 1 -> "1º"
 export const ordinal = (n) => `${n}º`;
