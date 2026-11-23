@@ -43,7 +43,7 @@ public class SecurityConfig {
 
                         // Dashboard: quem vê ao menos um tema (Resíduos ou NIP's). Cada aba é escondida no front
                         // conforme a role, e a API de cada tema continua exigindo a própria role
-                        .requestMatchers("/dashboard").hasAnyRole(Role.EMPLOYEE_WASTES, Role.EMPLOYEE_LEGAL)
+                        .requestMatchers("/dashboard").hasAnyRole(Role.EMPLOYEE_WASTES, Role.EMPLOYEE_ANS)
 
                         // Módulo de resíduos: EMPLOYEE_WASTES e acima (MANAGER, ADMINISTRATOR) pela hierarquia
                         .requestMatchers("/wastes", "/api/waste-records/**", "/api/waste-types/**").hasRole(Role.EMPLOYEE_WASTES)
@@ -51,10 +51,11 @@ public class SecurityConfig {
                         // Aba de Cooperados do dashboard (dados vindos do certificados-cooperados): MANAGER e acima
                         .requestMatchers("/api/cooperative-members/**").hasRole(Role.MANAGER)
 
-                        // Módulo de NIP's (telas e cadastros de NIP, status e natureza): EMPLOYEE_LEGAL e acima (MANAGER, ADMINISTRATOR)
-                        .requestMatchers("/nips/**", "/api/nips/**", "/api/nip-status/**", "/api/nip-natures/**").hasRole(Role.EMPLOYEE_LEGAL)
+                        // Módulo de NIP's (telas e cadastros de NIP, status e natureza): EMPLOYEE_ANS e acima (EMPLOYEE_LEGAL, MANAGER, ADMINISTRATOR)
+                        .requestMatchers("/nips/**", "/api/nips/**", "/api/nip-status/**", "/api/nip-natures/**").hasRole(Role.EMPLOYEE_ANS)
 
-                        // Módulo de processos (telas e cadastros de objeto, trâmite, status, probabilidade de perda, órgão julgador, processos e recursos): EMPLOYEE_LEGAL e acima (MANAGER, ADMINISTRATOR)
+                        // Módulo de processos (telas e cadastros de objeto, trâmite, status, probabilidade de perda, órgão julgador, processos e recursos): EMPLOYEE_LEGAL e acima (MANAGER, ADMINISTRATOR).
+                        // EMPLOYEE_ANS fica de fora: só acessa NIP's
                         .requestMatchers("/lawsuits/**", "/api/subject-matters/**", "/api/proceeding-stages/**", "/api/lawsuit-status/**", "/api/loss-probabilities/**", "/api/judging-bodies/**", "/api/lawsuits/**", "/api/lawsuit-appeals/**").hasRole(Role.EMPLOYEE_LEGAL)
 
                         .anyRequest().authenticated())
@@ -68,12 +69,14 @@ public class SecurityConfig {
     }
 
     // Quem tem a role da esquerda herda as da direita; o authorizeHttpRequests usa este bean automaticamente.
-    // Novos módulos entram como MANAGER > EMPLOYEE_<MODULO>
+    // Novos módulos entram como MANAGER > EMPLOYEE_<MODULO>.
+    // EMPLOYEE_LEGAL (NIP's + Processos) implica EMPLOYEE_ANS (só NIP's)
     @Bean
     static RoleHierarchy roleHierarchy() {
         return RoleHierarchyImpl.withDefaultRolePrefix()
                 .role(Role.ADMINISTRATOR).implies(Role.MANAGER)
                 .role(Role.MANAGER).implies(Role.EMPLOYEE_WASTES, Role.EMPLOYEE_LEGAL)
+                .role(Role.EMPLOYEE_LEGAL).implies(Role.EMPLOYEE_ANS)
                 .build();
     }
 
