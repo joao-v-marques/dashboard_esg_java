@@ -54,6 +54,16 @@
   pointer-events: none;
 }
 
+.field__input--with-prefix { padding-left: 46px; font-variant-numeric: tabular-nums; }
+.field__prefix {
+  position: absolute;
+  left: 14px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-faint);
+  pointer-events: none;
+}
+
 /* Inputs nativos de data/número com a mesma altura dos demais campos */
 .field__input[type="date"] { min-width: 0; }
 .field__input[type="number"] { font-variant-numeric: tabular-nums; }

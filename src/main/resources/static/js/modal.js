@@ -9,9 +9,12 @@
    - detailModal: leitura de um registro em seções de rótulo/valor, com uma
      ação opcional no rodapé (ex.: "Editar"). Resolve com o id da ação
      escolhida ou false se fechou.
+   - openCustomModal: casca do modal (cabeçalho, corpo, rodapé) para telas
+     próprias; mountFormFields monta/valida um formulário dentro dela.
 
    Campos do formulário aceitam, além do básico: `mask: { format, parse }`
-   (máscara de dígitos; o valor lido é parse(texto)), `validate(value)`
+   (máscara de dígitos; o valor lido é parse(texto)), `prefix`/`suffix`
+   (texto fixo à esquerda/direita, ex.: "R$" e "kg"), `validate(value)`
    (regra extra, devolve a mensagem ou null), `counter` em textarea com
    maxLength e, em select, grupos `{ group, options }` (viram <optgroup>).
 
@@ -199,7 +202,8 @@ function buildField(field, value) {
     } else {
         input = el('input', 'field__input field__input--plain');
         input.type = field.type ?? 'text';
-        input.value = field.mask && value ? field.mask.format(value) : (value ?? '');
+        const hasValue = value !== null && value !== undefined && value !== '';
+        input.value = field.mask && hasValue ? field.mask.format(value) : (value ?? '');
         if (field.mask) {
             input.inputMode = 'numeric';
             input.addEventListener('input', () => applyMask(input, field.mask.format));
@@ -229,6 +233,14 @@ function buildField(field, value) {
         const suffix = el('span', 'field__suffix', field.suffix);
         suffix.setAttribute('aria-hidden', 'true');
         control.append(suffix);
+    }
+
+    // Moeda/unidade fixa à esquerda do campo (ex.: "R$")
+    if (field.prefix) {
+        input.classList.add('field__input--with-prefix');
+        const prefix = el('span', 'field__prefix', field.prefix);
+        prefix.setAttribute('aria-hidden', 'true');
+        control.prepend(prefix);
     }
 
     if (field.type === 'password') {
@@ -276,7 +288,11 @@ function buildField(field, value) {
 
 function readValue(form, field) {
     const raw = form.elements[field.name].value;
-    if (field.mask) return field.mask.parse(raw) || null;
+    if (field.mask) {
+        // Vazio vira null; 0 continua valendo (ex.: valor monetário zerado)
+        const parsed = field.mask.parse(raw);
+        return parsed === '' || parsed === null || parsed === undefined || Number.isNaN(parsed) ? null : parsed;
+    }
     const value = field.type === 'password' ? raw : raw.trim();
     if (value === '') {
         // Um number com texto inválido chega vazio em .value: marca para a validação não tratar como "não preenchido"
@@ -314,30 +330,23 @@ function validateField(field, value) {
    API pública
    --------------------------------------------------------------------------- */
 
-export function openFormModal({
-    title, description, iconName, fields, values = {}, submitLabel = 'Salvar',
-    busyLabel = 'Salvando...', size = 'md', columns = 2, onSubmit,
-}) {
-    const shell = createShell({ title, description, size, iconName });
-    const { form, body, footer, alert } = shell;
-
+/**
+ * Monta a grade de campos dentro de `form` e devolve:
+ *   - grid: o nó a inserir no corpo do modal;
+ *   - collect(): valida e devolve os dados, ou null (marca os campos e foca o primeiro inválido);
+ *   - showError(error): distribui um ApiError entre os campos e o `alert` do topo.
+ * Usado pelo openFormModal e por modais próprios que têm um formulário embutido.
+ */
+export function mountFormFields(form, { fields, values = {}, columns = 2, alert }) {
     // columns: 4 para modais largos (xl); cada campo ocupa `span` colunas
     const grid = el('div', `form-grid${columns === 4 ? ' form-grid--4' : ''}`);
     fields.forEach((field) => grid.append(buildField(field, values[field.name])));
-    body.append(grid);
     clearErrorOnInput(form);
 
-    const cancel = makeButton('Cancelar', 'secondary');
-    const submit = makeButton(submitLabel, 'primary', 'submit');
-    footer.append(cancel, submit);
-
-    return present(shell, ({ finish, setBusy: setModalBusy }) => {
-        cancel.addEventListener('click', () => finish(false));
-        form.querySelector('input, select, textarea')?.focus();
-
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            showAlert(alert, null);
+    return {
+        grid,
+        collect() {
+            if (alert) showAlert(alert, null);
             clearFieldErrors(form);
 
             const data = {};
@@ -353,8 +362,46 @@ export function openFormModal({
             });
             if (firstInvalid) {
                 firstInvalid.focus();
-                return;
+                return null;
             }
+            return data;
+        },
+        showError(error) {
+            // Erros de campo vão para o campo; os que não têm campo no formulário e a
+            // mensagem geral (409, regra de negócio) vão para o alerta do topo
+            const fieldErrors = Object.entries(error.fields ?? {});
+            const unmatched = fieldErrors.filter(([name, message]) => !setFieldError(form, name, message));
+            if (alert) {
+                if (unmatched.length) showAlert(alert, unmatched.map(([, text]) => text).join(' '));
+                else if (!fieldErrors.length) showAlert(alert, error.message);
+            }
+            form.querySelector('.is-invalid input, .is-invalid select, .is-invalid textarea')?.focus();
+        },
+    };
+}
+
+export function openFormModal({
+    title, description, iconName, fields, values = {}, submitLabel = 'Salvar',
+    busyLabel = 'Salvando...', size = 'md', columns = 2, onSubmit,
+}) {
+    const shell = createShell({ title, description, size, iconName });
+    const { form, body, footer, alert } = shell;
+
+    const controller = mountFormFields(form, { fields, values, columns, alert });
+    body.append(controller.grid);
+
+    const cancel = makeButton('Cancelar', 'secondary');
+    const submit = makeButton(submitLabel, 'primary', 'submit');
+    footer.append(cancel, submit);
+
+    return present(shell, ({ finish, setBusy: setModalBusy }) => {
+        cancel.addEventListener('click', () => finish(false));
+        form.querySelector('input, select, textarea')?.focus();
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const data = controller.collect();
+            if (!data) return;
 
             setModalBusy(true);
             setBusy(submit, true, busyLabel, submitLabel);
@@ -366,15 +413,29 @@ export function openFormModal({
                 setModalBusy(false);
                 setBusy(submit, false, busyLabel, submitLabel);
                 cancel.disabled = false;
-
-                // Erros de campo vão para o campo; os que não têm campo no formulário e a
-                // mensagem geral (409, regra de negócio) vão para o alerta do topo
-                const fieldErrors = Object.entries(error.fields ?? {});
-                const unmatched = fieldErrors.filter(([name, message]) => !setFieldError(form, name, message));
-                if (unmatched.length) showAlert(alert, unmatched.map(([, text]) => text).join(' '));
-                else if (!fieldErrors.length) showAlert(alert, error.message);
-                form.querySelector('.is-invalid input, .is-invalid select, .is-invalid textarea')?.focus();
+                controller.showError(error);
             }
+        });
+    });
+}
+
+/**
+ * Modal livre: o chamador monta corpo e rodapé em `render(context)`.
+ * context: { dialog, form, body, footer, alert, finish(result), setBusy(bool) (trava Esc/fechar),
+ *            showAlert(message), makeButton(label, variant, type), setButtonBusy(button, busy, busyLabel, idleLabel) }
+ * O submit do <form> nunca navega; quem precisar trata o evento no render.
+ */
+export function openCustomModal({ title, description, iconName, size = 'lg', render }) {
+    const shell = createShell({ title, description, size, iconName });
+    shell.form.addEventListener('submit', (event) => event.preventDefault());
+
+    return present(shell, (controls) => {
+        render({
+            ...shell,
+            ...controls,
+            showAlert: (message) => showAlert(shell.alert, message),
+            makeButton,
+            setButtonBusy: setBusy,
         });
     });
 }
