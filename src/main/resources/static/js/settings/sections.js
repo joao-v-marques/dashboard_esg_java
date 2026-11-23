@@ -156,17 +156,24 @@ function resetPassword(row) {
     });
 }
 
-/* Funções e Setores (mesmo formato: id, name, isActive) -------------------- */
+/* Cadastros só com nome (id, name, isActive) ------------------------------- */
 
-function simpleNameSection(config) {
+/**
+ * Seção de cadastro com um único campo "nome" (funções, setores e os cadastros
+ * de Processos Jurídicos). Além das chaves de seção, aceita:
+ *   nameMaxLength (padrão 100), nameMultiline (textarea com contador, para nomes longos),
+ *   extraColumns(ctx) (colunas entre o nome e o status), labelOf e protectedReason.
+ */
+export function simpleNameSection(config) {
     const label = config.labelOf ?? ((name) => name);
+    const maxLength = config.nameMaxLength ?? 100;
     return {
         modalSize: 'sm',
         searchPlaceholder: 'Buscar por nome',
         displayName: (row) => label(row.name),
         searchText: (row) => `${row.name} ${label(row.name)}`,
 
-        columns: () => [
+        columns: (ctx) => [
             {
                 label: 'Nome',
                 render: (row) => primaryCell({
@@ -175,13 +182,15 @@ function simpleNameSection(config) {
                     tags: config.protectedReason?.(row) ? [tag('Protegida', 'lock')] : [],
                 }),
             },
+            ...(config.extraColumns?.(ctx) ?? []),
             { label: 'Status', render: statusBadge },
         ],
 
         formDescription: () => null,
         formFields: () => [{
-            name: 'name', label: config.nameLabel, required: true, maxLength: 100,
+            name: 'name', label: config.nameLabel, required: true, maxLength,
             placeholder: config.namePlaceholder, autocomplete: 'off', full: true,
+            ...(config.nameMultiline ? { type: 'textarea', rows: 3, counter: true } : {}),
         }],
         valuesFrom: (row) => ({ name: row.name }),
         toPayload: (data) => data,
