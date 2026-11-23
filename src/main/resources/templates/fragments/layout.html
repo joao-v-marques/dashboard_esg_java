@@ -113,7 +113,7 @@
                     <span>Início</span>
                 </a>
             </li>
-            <li data-requires-role="EMPLOYEE_WASTES EMPLOYEE_LEGAL" hidden>
+            <li data-requires-role="EMPLOYEE_WASTES EMPLOYEE_ANS" hidden>
                 <a class="sidebar__link" th:href="@{/dashboard}"
                    th:classappend="${active == 'dashboard'} ? 'is-active'"
                    th:attr="aria-current=${active == 'dashboard'} ? 'page' : null">
@@ -124,7 +124,7 @@
         </ul>
 
         <!-- O rótulo "Módulos" só aparece para quem tem ao menos um módulo -->
-        <p class="sidebar__label sidebar__label--section" data-requires-role="EMPLOYEE_WASTES EMPLOYEE_LEGAL" hidden>Módulos</p>
+        <p class="sidebar__label sidebar__label--section" data-requires-role="EMPLOYEE_WASTES EMPLOYEE_ANS" hidden>Módulos</p>
         <ul class="sidebar__list">
             <!-- Grupo recolhível: vem aberto quando a página ativa pertence a ele (js/shell.js alterna) -->
             <li class="sidebar__group" th:with="inWastes=${active == 'wastes'}" data-requires-role="EMPLOYEE_WASTES" hidden>
@@ -144,7 +144,7 @@
                     </li>
                 </ul>
             </li>
-            <li class="sidebar__group" th:with="inNips=${active == 'nips' or active == 'nips-register'}" data-requires-role="EMPLOYEE_LEGAL" hidden>
+            <li class="sidebar__group" th:with="inNips=${active == 'nips' or active == 'nips-register'}" data-requires-role="EMPLOYEE_ANS" hidden>
                 <button class="sidebar__link sidebar__group-toggle" type="button" data-nav-group
                         aria-controls="nav-nips"
                         th:classappend="${inNips} ? 'has-active'"

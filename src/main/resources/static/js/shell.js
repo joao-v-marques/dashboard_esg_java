@@ -15,6 +15,7 @@ const ROLE_LABELS = {
     MANAGER: 'Gestor',
     EMPLOYEE_WASTES: 'Colaborador · Resíduos',
     EMPLOYEE_LEGAL: 'Colaborador · Jurídico',
+    EMPLOYEE_ANS: 'ANS/Ouvidor',
     EMPLOYEE: 'Colaborador',
 };
 
@@ -23,7 +24,7 @@ export function roleLabel(role) {
     return ROLE_LABELS[role] ?? role.charAt(0) + role.slice(1).toLowerCase().replace(/_/g, ' ');
 }
 
-// user.roles já vem com a hierarquia aplicada pelo backend (ADMINISTRATOR > MANAGER > EMPLOYEE_WASTES / EMPLOYEE_LEGAL)
+// user.roles já vem com a hierarquia aplicada pelo backend (ADMINISTRATOR > MANAGER > EMPLOYEE_WASTES / EMPLOYEE_LEGAL > EMPLOYEE_ANS)
 export function hasRole(user, role) {
     return user?.roles?.includes(role) ?? false;
 }

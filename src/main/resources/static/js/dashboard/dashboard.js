@@ -32,7 +32,7 @@ const COLOR_NOT_RECYCLED = 'var(--color-chart-2)';
 const COLOR_OTHER = 'var(--color-text-faint)';
 
 // Role mínima para ver cada tema (a aba fica oculta via data-requires-role no HTML)
-const THEME_ROLES = { residuos: 'EMPLOYEE_WASTES', cooperados: 'MANAGER', nips: 'EMPLOYEE_LEGAL' };
+const THEME_ROLES = { residuos: 'EMPLOYEE_WASTES', cooperados: 'MANAGER', nips: 'EMPLOYEE_ANS' };
 const THEMES = Object.keys(THEME_ROLES);
 const THEME_TITLES = { residuos: 'Resíduos', cooperados: 'Cooperados', nips: "NIP's" };
 
