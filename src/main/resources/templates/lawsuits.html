@@ -1,0 +1,161 @@
+<!doctype html>
+<!--
+  Processos Jurídicos › Controlar Processos.
+  Indicadores no topo e a lista de processos com filtros; detalhes, edição e a
+  trilha de recursos em modal. Tudo é montado por js/lawsuits/lawsuits.js a partir
+  de GET /api/lawsuits, /api/lawsuit-appeals e dos cadastros do módulo.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: appHead('Controlar Processos')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/lawsuits.css}">
+</head>
+
+<body>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header th:replace="~{fragments/layout :: topbar}"></header>
+<aside th:replace="~{fragments/layout :: sidebar('lawsuits')}"></aside>
+<div class="sidebar-scrim" data-sidebar-scrim hidden></div>
+
+<main class="app-main" id="conteudo">
+    <div class="page page--wide">
+
+        <header class="page-head page-head--split">
+            <div class="page-head__text">
+                <p class="page-head__eyebrow">Governança · Processos Jurídicos</p>
+                <h1 class="page-head__title">Controlar Processos</h1>
+                <p class="page-head__subtitle">Acompanhe os processos judiciais da cooperativa, o valor em causa e o risco de perda, e registre os recursos de cada um.</p>
+            </div>
+            <a class="btn btn--primary page-head__action" th:href="@{/lawsuits/register}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                <span>Registrar Processo Jurídico</span>
+            </a>
+        </header>
+
+        <!-- Indicadores: refletem os filtros aplicados -->
+        <section class="kpis" aria-label="Indicadores dos processos filtrados" data-kpis>
+            <article class="card kpi">
+                <span class="kpi__icon" data-kpi-icon="list"></span>
+                <p class="kpi__label">Processos</p>
+                <p class="kpi__value" data-kpi="total"><span class="skeleton skeleton--line" style="width: 48px"></span></p>
+                <p class="kpi__hint" data-kpi-hint="total"></p>
+            </article>
+            <article class="card kpi">
+                <span class="kpi__icon" data-kpi-icon="coins"></span>
+                <p class="kpi__label">Valor em causa</p>
+                <p class="kpi__value" data-kpi="value"><span class="skeleton skeleton--line" style="width: 96px"></span></p>
+                <p class="kpi__hint" data-kpi-hint="value"></p>
+            </article>
+            <article class="card kpi kpi--risk">
+                <span class="kpi__icon" data-kpi-icon="trendUp"></span>
+                <p class="kpi__label">Risco provável</p>
+                <p class="kpi__value" data-kpi="risk"><span class="skeleton skeleton--line" style="width: 48px"></span></p>
+                <div class="meter meter--risk" role="img" data-kpi-meter aria-label="Proporção com risco provável">
+                    <span class="meter__fill" data-kpi-meter-fill></span>
+                </div>
+                <p class="kpi__hint" data-kpi-hint="risk"></p>
+            </article>
+            <article class="card kpi">
+                <span class="kpi__icon" data-kpi-icon="gavel"></span>
+                <p class="kpi__label">Com recurso</p>
+                <p class="kpi__value" data-kpi="appeals"><span class="skeleton skeleton--line" style="width: 48px"></span></p>
+                <p class="kpi__hint" data-kpi-hint="appeals"></p>
+            </article>
+        </section>
+
+        <section class="card list-panel" aria-labelledby="lawsuits-title">
+            <header class="list-panel__header">
+                <div>
+                    <h2 class="list-panel__title" id="lawsuits-title">Processos cadastrados</h2>
+                    <p class="list-panel__description">Busque por número, partes ou objeto e filtre por trâmite, status, recursos, período ou valor da causa.</p>
+                </div>
+                <button class="btn btn--secondary btn--sm list-panel__filters-toggle" type="button"
+                        data-filters-toggle aria-expanded="false" aria-controls="lawsuits-filters">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3H2l8 9.5V19l4 2v-8.5Z"/></svg>
+                    <span data-filters-toggle-label>Filtros</span>
+                </button>
+            </header>
+
+            <form class="filters lawsuit-filters" id="lawsuits-filters" data-filters role="search" aria-label="Filtrar processos">
+                <div class="filters__field filters__field--search">
+                    <label class="filters__label" for="filter-search">Buscar</label>
+                    <div class="search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                        <input type="search" id="filter-search" name="search" autocomplete="off" placeholder="Número do processo, autor, réu ou objeto">
+                    </div>
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-subject">Objeto</label>
+                    <select class="filters__select field__input--select" id="filter-subject" name="subject">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-stage">Trâmite</label>
+                    <select class="filters__select field__input--select" id="filter-stage" name="stage">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-status">Status</label>
+                    <select class="filters__select field__input--select" id="filter-status" name="status">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-appeals">Recursos</label>
+                    <select class="filters__select field__input--select" id="filter-appeals" name="appeals">
+                        <option value="">Todos</option>
+                        <option value="with">Com recurso</option>
+                        <option value="without">Sem recurso</option>
+                    </select>
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-from">Data do processo de</label>
+                    <input class="filters__select" type="date" id="filter-from" name="from">
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-to">Até</label>
+                    <input class="filters__select" type="date" id="filter-to" name="to">
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-min">Valor da causa mínimo</label>
+                    <input class="filters__select filters__money" type="number" id="filter-min" name="min" min="0" step="0.01" inputmode="decimal" placeholder="R$ 0,00">
+                </div>
+                <div class="filters__field">
+                    <label class="filters__label" for="filter-max">Valor máximo</label>
+                    <input class="filters__select filters__money" type="number" id="filter-max" name="max" min="0" step="0.01" inputmode="decimal" placeholder="Sem limite">
+                </div>
+                <div class="filters__actions">
+                    <button class="btn btn--secondary btn--sm" type="reset" data-filters-clear disabled>Limpar filtros</button>
+                </div>
+            </form>
+
+            <div class="list-panel__bar">
+                <p class="list-panel__count" data-results aria-live="polite"></p>
+                <!-- Opções de risco montadas a partir de /api/loss-probabilities -->
+                <div class="lawsuits-scope segmented" role="group" aria-label="Probabilidade de perda" data-scope>
+                    <button class="segmented__option" type="button" data-scope-value="" aria-pressed="true">Todos os riscos</button>
+                </div>
+            </div>
+
+            <div class="list-panel__table lawsuits-table" data-table></div>
+
+            <nav class="pager" aria-label="Paginação dos processos" data-pager hidden>
+                <button class="icon-btn" type="button" data-page="prev" aria-label="Página anterior">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <span class="pager__status" data-page-status></span>
+                <button class="icon-btn" type="button" data-page="next" aria-label="Próxima página">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+            </nav>
+        </section>
+
+    </div>
+</main>
+
+<script type="module" th:src="@{/js/lawsuits/lawsuits.js}"></script>
+</body>
+</html>
