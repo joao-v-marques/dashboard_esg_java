@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/nips/**", "/api/nips/**", "/api/nip-status/**", "/api/nip-natures/**").hasRole(Role.EMPLOYEE_LEGAL)
 
                         // Módulo de processos (cadastros de objeto, trâmite, status e probabilidade de perda): EMPLOYEE_LEGAL e acima (MANAGER, ADMINISTRATOR)
-                        .requestMatchers("/api/subject-matters/**", "/api/proceeding-stages/**", "/api/lawsuit-status/**", "/api/loss-probabilities/**").hasRole(Role.EMPLOYEE_LEGAL)
+                        .requestMatchers("/api/subject-matters/**", "/api/proceeding-stages/**", "/api/lawsuit-status/**", "/api/loss-probabilities/**", "/api/lawsuits/**").hasRole(Role.EMPLOYEE_LEGAL)
 
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

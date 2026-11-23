@@ -66,7 +66,7 @@ public class Lawsuit {
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by")
     private User updatedBy;
 
