@@ -1,0 +1,285 @@
+<!doctype html>
+<!--
+  Processos Jurídicos › Registrar Processo.
+  Formulário em seções (identificação, partes, classificação e risco de perda)
+  com resumo ao vivo ao lado, no mesmo modelo do Registrar NIP (reaproveita o
+  css/nips.css). Objetos, trâmites, status e probabilidades vêm da API; o envio
+  e o painel de confirmação ficam em js/lawsuits/register.js.
+-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: appHead('Registrar Processo')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/nips.css}">
+    <link rel="stylesheet" th:href="@{/css/lawsuits.css}">
+</head>
+
+<body>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header th:replace="~{fragments/layout :: topbar}"></header>
+<aside th:replace="~{fragments/layout :: sidebar('lawsuits-register')}"></aside>
+<div class="sidebar-scrim" data-sidebar-scrim hidden></div>
+
+<main class="app-main" id="conteudo">
+    <div class="page page--wide">
+
+        <header class="page-head">
+            <p class="page-head__eyebrow">Governança · Processos Jurídicos</p>
+            <h1 class="page-head__title">Registrar Processo</h1>
+            <p class="page-head__subtitle">Lance um novo processo judicial com o número CNJ, as partes, a classificação atual e o risco de perda.</p>
+        </header>
+
+        <div class="nip-layout" data-layout>
+            <section class="card nip-card" aria-label="Formulário de registro do processo">
+                <form class="nip-form" data-lawsuit-form novalidate>
+
+                    <div class="alert nip-form__alert" role="alert" data-form-alert hidden>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                        <span></span>
+                    </div>
+
+                    <!-- 1. Identificação ------------------------------------------------ -->
+                    <section class="nip-section" aria-labelledby="secao-identificacao">
+                        <header class="nip-section__head">
+                            <span class="nip-section__step" aria-hidden="true">1</span>
+                            <div>
+                                <h2 class="nip-section__title" id="secao-identificacao">Identificação do processo</h2>
+                                <p class="nip-section__description">Número no padrão CNJ, data e valor da causa. O número não pode se repetir.</p>
+                            </div>
+                        </header>
+
+                        <div class="form-grid lawsuit-grid--identity">
+                            <div class="field" data-field="caseNumber">
+                                <label class="field__label" for="lawsuit-case-number">Número do processo <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <input class="field__input field__input--plain nip-input--mono" id="lawsuit-case-number" name="caseNumber" type="text"
+                                           inputmode="numeric" maxlength="25" placeholder="0000000-00.0000.0.00.0000" autocomplete="off" spellcheck="false" required
+                                           aria-describedby="lawsuit-case-number-help lawsuit-case-number-check lawsuit-case-number-error">
+                                </div>
+                                <p class="field__help" id="lawsuit-case-number-help">Padrão CNJ: NNNNNNN-DD.AAAA.J.TR.OOOO</p>
+                                <p class="case-check" id="lawsuit-case-number-check" data-case-check hidden>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+                                    <span>O dígito verificador não confere. Confira o número antes de registrar.</span>
+                                </p>
+                                <p class="field__error" id="lawsuit-case-number-error" data-field-error hidden></p>
+                            </div>
+
+                            <div class="field" data-field="lawsuitDate">
+                                <label class="field__label" for="lawsuit-date">Data do processo <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <input class="field__input field__input--plain" id="lawsuit-date" name="lawsuitDate" type="date"
+                                           required aria-describedby="lawsuit-date-error">
+                                </div>
+                                <p class="field__error" id="lawsuit-date-error" data-field-error hidden></p>
+                            </div>
+
+                            <div class="field" data-field="claimValue">
+                                <label class="field__label" for="lawsuit-claim-value">Valor da causa <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <span class="field__prefix" aria-hidden="true">R$</span>
+                                    <input class="field__input field__input--plain field__input--with-prefix" id="lawsuit-claim-value" name="claimValue" type="text"
+                                           inputmode="decimal" maxlength="21" placeholder="0,00" autocomplete="off" required
+                                           aria-describedby="lawsuit-claim-value-error">
+                                </div>
+                                <p class="field__error" id="lawsuit-claim-value-error" data-field-error hidden></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 2. Partes ------------------------------------------------------- -->
+                    <section class="nip-section" aria-labelledby="secao-partes">
+                        <header class="nip-section__head">
+                            <span class="nip-section__step" aria-hidden="true">2</span>
+                            <div>
+                                <h2 class="nip-section__title" id="secao-partes">Partes</h2>
+                                <p class="nip-section__description">Quem move a ação e contra quem ela é movida.</p>
+                            </div>
+                        </header>
+
+                        <div class="form-grid lawsuit-grid--parties">
+                            <div class="field" data-field="plaintiff">
+                                <label class="field__label" for="lawsuit-plaintiff">Autor <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <input class="field__input field__input--plain" id="lawsuit-plaintiff" name="plaintiff" type="text"
+                                           maxlength="255" autocomplete="off" required aria-describedby="lawsuit-plaintiff-error">
+                                </div>
+                                <p class="field__error" id="lawsuit-plaintiff-error" data-field-error hidden></p>
+                            </div>
+
+                            <button class="icon-btn parties-swap" type="button" data-swap-parties
+                                    aria-label="Inverter autor e réu" data-tooltip="Inverter autor e réu">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3-4 4 4 4M4 7h16M16 21l4-4-4-4M20 17H4"/></svg>
+                            </button>
+
+                            <div class="field" data-field="defendant">
+                                <label class="field__label" for="lawsuit-defendant">Réu <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <input class="field__input field__input--plain" id="lawsuit-defendant" name="defendant" type="text"
+                                           maxlength="255" autocomplete="off" required aria-describedby="lawsuit-defendant-error">
+                                </div>
+                                <p class="field__error" id="lawsuit-defendant-error" data-field-error hidden></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 3. Classificação ------------------------------------------------ -->
+                    <section class="nip-section" aria-labelledby="secao-classificacao">
+                        <header class="nip-section__head">
+                            <span class="nip-section__step" aria-hidden="true">3</span>
+                            <div>
+                                <h2 class="nip-section__title" id="secao-classificacao">Classificação</h2>
+                                <p class="nip-section__description">Objeto da ação, onde ela tramita e a situação atual.</p>
+                            </div>
+                        </header>
+
+                        <!-- Falha ao carregar os cadastros: o envio fica bloqueado até recarregar -->
+                        <div class="empty empty--error nip-lookups-error" data-lookups-error hidden>
+                            <span class="empty__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></span>
+                            <p class="empty__title">Não foi possível carregar as opções</p>
+                            <p class="empty__text" data-lookups-error-text></p>
+                            <button class="btn btn--secondary btn--sm" type="button" data-lookups-retry>Tentar novamente</button>
+                        </div>
+
+                        <div class="form-grid" data-lookups>
+                            <div class="field field--full" data-field="subjectMatterId">
+                                <label class="field__label" for="lawsuit-subject">Objeto <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <select class="field__input field__input--plain field__input--select" id="lawsuit-subject" name="subjectMatterId"
+                                            required disabled aria-describedby="lawsuit-subject-error">
+                                        <option value="">Carregando objetos...</option>
+                                    </select>
+                                </div>
+                                <p class="field__error" id="lawsuit-subject-error" data-field-error hidden></p>
+                            </div>
+
+                            <div class="field" data-field="proceedingStageId">
+                                <label class="field__label" for="lawsuit-stage">Trâmite <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <select class="field__input field__input--plain field__input--select" id="lawsuit-stage" name="proceedingStageId"
+                                            required disabled aria-describedby="lawsuit-stage-error">
+                                        <option value="">Carregando trâmites...</option>
+                                    </select>
+                                </div>
+                                <p class="field__error" id="lawsuit-stage-error" data-field-error hidden></p>
+                            </div>
+
+                            <div class="field" data-field="statusId">
+                                <label class="field__label" for="lawsuit-status">Status <span class="field__required" aria-hidden="true">*</span></label>
+                                <div class="field__control">
+                                    <select class="field__input field__input--plain field__input--select" id="lawsuit-status" name="statusId"
+                                            required disabled aria-describedby="lawsuit-status-error">
+                                        <option value="">Carregando status...</option>
+                                    </select>
+                                </div>
+                                <p class="field__error" id="lawsuit-status-error" data-field-error hidden></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 4. Risco de perda ----------------------------------------------- -->
+                    <section class="nip-section" aria-labelledby="secao-risco">
+                        <header class="nip-section__head">
+                            <span class="nip-section__step" aria-hidden="true">4</span>
+                            <div>
+                                <h2 class="nip-section__title" id="secao-risco">Risco de perda</h2>
+                                <p class="nip-section__description">Avaliação atual da chance de a cooperativa perder a ação.</p>
+                            </div>
+                        </header>
+
+                        <div class="form-grid" data-lookups>
+                            <fieldset class="field field--full nip-natures" data-field="lossProbabilityId">
+                                <legend class="field__label">Probabilidade de perda <span class="field__required" aria-hidden="true">*</span></legend>
+                                <div class="nature-options" data-risks aria-describedby="lawsuit-risk-error">
+                                    <span class="skeleton nature-option--skeleton"></span>
+                                    <span class="skeleton nature-option--skeleton"></span>
+                                </div>
+                                <p class="field__error" id="lawsuit-risk-error" data-field-error hidden></p>
+                            </fieldset>
+                        </div>
+                    </section>
+
+                    <!-- Ações: barra fixa no rodapé do card enquanto o formulário rola -->
+                    <footer class="nip-form__actions">
+                        <p class="nip-form__progress" data-progress-compact aria-hidden="true"></p>
+                        <p class="nip-form__hint"><span class="field__required" aria-hidden="true">*</span> Campos obrigatórios</p>
+                        <div class="nip-form__buttons">
+                            <button class="btn btn--secondary" type="button" data-clear>Limpar</button>
+                            <button class="btn btn--primary" type="submit" data-submit disabled>
+                                <span class="btn__spinner" aria-hidden="true" hidden></span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-submit-icon><path d="M20 6 9 17l-5-5"/></svg>
+                                <span data-submit-label>Registrar processo</span>
+                            </button>
+                        </div>
+                    </footer>
+                </form>
+            </section>
+
+            <!-- Resumo ao vivo (só em telas largas) -->
+            <aside class="nip-aside" aria-label="Resumo do processo">
+                <section class="card nip-summary">
+                    <header class="nip-summary__head">
+                        <h2 class="nip-summary__title">Resumo</h2>
+                        <span class="nip-summary__count" data-progress-text></span>
+                    </header>
+                    <div class="nip-meter" role="progressbar" aria-label="Campos obrigatórios preenchidos"
+                         aria-valuemin="0" aria-valuemax="9" aria-valuenow="0" data-progress-bar>
+                        <span class="nip-meter__fill" data-progress-fill></span>
+                    </div>
+
+                    <!-- Ficha do processo: o número CNJ e o que ele revela, parte por parte -->
+                    <div class="nip-summary__hero case-hero">
+                        <p class="nip-summary__label">Processo</p>
+                        <p class="nip-summary__number case-hero__number" data-summary="caseNumber"></p>
+                        <dl class="case-anatomy" data-case-anatomy aria-label="Leitura do número CNJ"></dl>
+                        <p class="case-hero__warning" data-case-warning hidden>Dígito verificador não confere</p>
+                        <div class="nip-summary__badges">
+                            <span class="badge risk-badge" data-summary-risk hidden></span>
+                        </div>
+                    </div>
+
+                    <dl class="nip-summary__list">
+                        <div><dt>Data</dt><dd data-summary="lawsuitDate"></dd></div>
+                        <div><dt>Valor da causa</dt><dd data-summary="claimValue"></dd></div>
+                        <div><dt>Autor</dt><dd data-summary="plaintiff"></dd></div>
+                        <div><dt>Réu</dt><dd data-summary="defendant"></dd></div>
+                        <div><dt>Objeto</dt><dd data-summary="subjectMatterId"></dd></div>
+                        <div><dt>Trâmite</dt><dd data-summary="proceedingStageId"></dd></div>
+                        <div><dt>Status</dt><dd data-summary="statusId"></dd></div>
+                    </dl>
+                </section>
+
+                <section class="nip-tips" aria-labelledby="dicas-title">
+                    <h2 class="nip-tips__title" id="dicas-title">Antes de registrar</h2>
+                    <ul class="nip-tips__list">
+                        <li>O número do processo é único e fica salvo só com os 20 dígitos.</li>
+                        <li>A data do processo não pode ser futura.</li>
+                        <li>No valor da causa, use vírgula para os centavos: 1500,50 vira R$ 1.500,50.</li>
+                        <li>Recursos são registrados depois, em Controlar Processos.</li>
+                    </ul>
+                </section>
+            </aside>
+        </div>
+
+        <!-- Confirmação após registrar -->
+        <section class="card nip-success" data-success hidden aria-labelledby="sucesso-title">
+            <span class="nip-success__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <h2 class="nip-success__title" id="sucesso-title" tabindex="-1">Processo registrado com sucesso</h2>
+            <p class="nip-success__text" data-success-text></p>
+
+            <dl class="nip-success__list" data-success-list></dl>
+
+            <div class="nip-success__actions">
+                <a class="btn btn--secondary" th:href="@{/lawsuits}" data-success-view>Ver em Controlar Processos</a>
+                <button class="btn btn--primary" type="button" data-register-another>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Registrar outro processo</span>
+                </button>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<script type="module" th:src="@{/js/lawsuits/register.js}"></script>
+</body>
+</html>
