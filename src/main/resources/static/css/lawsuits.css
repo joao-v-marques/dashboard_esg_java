@@ -435,3 +435,14 @@
   .parties-swap { justify-self: center; margin-top: 0; }
   .parties-swap svg { transform: rotate(90deg); }
 }
+
+/* ==========================================================================
+   Processos Jurídicos › Configurações. Layout de css/settings.css; aqui só o
+   nome longo dos cadastros (status são frases) e a coluna "Em uso".
+   ========================================================================== */
+
+.lawsuit-settings-table .cell-primary__title { max-width: 560px; font-weight: 500; line-height: 1.45; overflow-wrap: anywhere; }
+
+.usage { font-size: var(--text-sm); font-weight: 600; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.usage--none { font-weight: 400; color: var(--color-text-faint); }
+.usage--idle { color: var(--color-text-faint); }
