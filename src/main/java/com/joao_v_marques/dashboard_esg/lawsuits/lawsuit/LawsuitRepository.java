@@ -11,4 +11,6 @@ public interface LawsuitRepository extends JpaRepository<Lawsuit, Integer> {
     @Override
     @EntityGraph(attributePaths = {"subjectMatter", "proceedingStage", "status", "lossProbability", "insertedBy", "updatedBy"})
     List<Lawsuit> findAll();
+
+    boolean existsByCaseNumber(String caseNumber);
 }
