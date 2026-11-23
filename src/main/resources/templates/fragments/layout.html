@@ -166,7 +166,7 @@
                     </li>
                 </ul>
             </li>
-            <li class="sidebar__group" th:with="inLawsuits=${active == 'lawsuits' or active == 'lawsuits-register'}" data-requires-role="EMPLOYEE_LEGAL" hidden>
+            <li class="sidebar__group" th:with="inLawsuits=${active == 'lawsuits' or active == 'lawsuits-register' or active == 'lawsuits-settings'}" data-requires-role="EMPLOYEE_LEGAL" hidden>
                 <button class="sidebar__link sidebar__group-toggle" type="button" data-nav-group
                         aria-controls="nav-lawsuits"
                         th:classappend="${inLawsuits} ? 'has-active'"
@@ -185,6 +185,11 @@
                         <a class="sidebar__sublink" th:href="@{/lawsuits/register}"
                            th:classappend="${active == 'lawsuits-register'} ? 'is-active'"
                            th:attr="aria-current=${active == 'lawsuits-register'} ? 'page' : null">Registrar Processo</a>
+                    </li>
+                    <li>
+                        <a class="sidebar__sublink" th:href="@{/lawsuits/settings}"
+                           th:classappend="${active == 'lawsuits-settings'} ? 'is-active'"
+                           th:attr="aria-current=${active == 'lawsuits-settings'} ? 'page' : null">Configurações</a>
                     </li>
                 </ul>
             </li>
