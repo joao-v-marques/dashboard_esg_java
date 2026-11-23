@@ -8,6 +8,11 @@ export const kgFormat = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 
 export const percentFormat = new Intl.NumberFormat('pt-BR', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 export const intFormat = new Intl.NumberFormat('pt-BR');
 export const dateTimeFormat = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+// Valores em reais: "R$ 15.000,00" e, nos indicadores, "R$ 1,2 mi"
+export const currencyFormat = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+export const compactCurrencyFormat = new Intl.NumberFormat('pt-BR', {
+    style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1,
+});
 
 const weekdayFormat = new Intl.DateTimeFormat('pt-BR', { weekday: 'short', timeZone: 'UTC' });
 const monthFormat = new Intl.DateTimeFormat('pt-BR', { month: 'short', timeZone: 'UTC' });
