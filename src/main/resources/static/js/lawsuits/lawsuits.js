@@ -5,13 +5,14 @@
    busca, ordenação, paginação e indicadores são calculados no cliente sobre a
    lista completa. Cada linha abre o detalhe, a edição (PUT /api/lawsuits/{id})
    ou o modal de recursos: a trilha recursal do processo e o registro de um novo
-   recurso (POST /api/lawsuits/{id}/appeals).
+   recurso (POST /api/lawsuits/{id}/appeals). Encerrar e reabrir usam
+   PATCH /api/lawsuits/{id}/close e /reopen (is_active = false é encerrado).
    ========================================================================== */
 
 import '../shell.js';
 import { api, ApiError } from '../api.js';
 import { ICONS } from '../icons.js';
-import { openFormModal, detailModal, openCustomModal, mountFormFields } from '../modal.js';
+import { openFormModal, detailModal, openCustomModal, mountFormFields, confirmModal } from '../modal.js';
 import { renderTable } from '../data-table.js';
 import { toast, normalize, consumeQueryParam } from '../ui.js';
 import {
@@ -319,6 +320,9 @@ function renderList() {
             { icon: 'eye', label: 'Ver detalhes', onClick: () => openDetails(row) },
             { icon: 'edit', label: 'Editar processo', onClick: () => openEdit(row), disabledReason: blockedReason(row) },
             { icon: 'gavel', label: 'Recursos do processo', onClick: () => openAppeals(row), disabledReason: lookupsBlockedReason() },
+            isActiveRow(row)
+                ? { icon: 'lock', label: 'Encerrar processo', tone: 'danger', onClick: () => toggleClosed(row) }
+                : { icon: 'restore', label: 'Reabrir processo', onClick: () => toggleClosed(row) },
         ],
         errorText: entry.error,
         onRetry: () => {
@@ -345,7 +349,7 @@ function lookupsBlockedReason() {
 }
 
 function blockedReason(row) {
-    if (!isActiveRow(row)) return 'Processo inativo não pode ser editado.';
+    if (!isActiveRow(row)) return 'Processo encerrado não pode ser editado.';
     return lookupsBlockedReason();
 }
 
@@ -450,7 +454,7 @@ function caseCell(row) {
         el('span', 'cell-case__number', formatCaseNumber(row.caseNumber)),
         el('span', 'cell-case__meta', `${formatDay(row.lawsuitDate)}, ${weekday(row.lawsuitDate)}`),
     );
-    if (!isActiveRow(row)) cell.append(el('span', 'badge badge--muted badge--plain cell-case__flag', 'Inativo'));
+    if (!isActiveRow(row)) cell.append(el('span', 'badge badge--muted badge--plain cell-case__flag', 'Encerrado'));
     return cell;
 }
 
@@ -543,6 +547,9 @@ async function openDetails(row) {
         actions.push({ id: 'appeals', label: 'Recursos', icon: 'gavel', variant: 'secondary' });
         if (isActiveRow(row)) actions.push({ id: 'edit', label: 'Editar processo', icon: 'edit' });
     }
+    actions.unshift(isActiveRow(row)
+        ? { id: 'close', label: 'Encerrar processo', icon: 'lock', variant: 'secondary' }
+        : { id: 'reopen', label: 'Reabrir processo', icon: 'restore', variant: 'secondary' });
 
     const choice = await detailModal({
         title: `Processo ${formatCaseNumber(row.caseNumber)}`,
@@ -556,6 +563,7 @@ async function openDetails(row) {
                     { label: 'Status', value: row.statusName },
                     { label: 'Trâmite', value: row.proceedingStageName },
                     { label: 'Probabilidade de perda', value: riskBadge(row.lossProbabilityName) },
+                    { label: 'Encerramento', value: isActiveRow(row) ? 'Processo ativo' : (closedText(row) ?? 'Encerrado') },
                 ],
             },
             {
@@ -596,6 +604,39 @@ async function openDetails(row) {
 
     if (choice === 'edit') openEdit(row);
     if (choice === 'appeals') openAppeals(row);
+    if (choice === 'close' || choice === 'reopen') toggleClosed(row);
+}
+
+/* Encerramento ------------------------------------------------------------- */
+
+function closedText(row) {
+    const text = auditText(row.closedAt, row.closedByName);
+    return text ? `Encerrado em ${text}` : null;
+}
+
+// Encerrar: o processo sai dos ativos e não pode ser editado nem receber recursos. Reabrir desfaz
+async function toggleClosed(row) {
+    const reopen = !isActiveRow(row);
+    const caseNumber = formatCaseNumber(row.caseNumber);
+    const message = document.createDocumentFragment();
+    message.append(reopen ? 'Reabrir o processo ' : 'Encerrar o processo ', el('strong', null, caseNumber), '? ', reopen
+        ? 'Ele volta a contar como ativo e pode ser editado e receber recursos.'
+        : 'Ele deixa de contar como ativo e não poderá ser editado nem receber recursos até ser reaberto.');
+
+    const done = await confirmModal({
+        title: reopen ? 'Reabrir processo' : 'Encerrar processo',
+        message,
+        iconName: reopen ? 'restore' : 'lock',
+        tone: reopen ? 'primary' : 'danger',
+        confirmLabel: reopen ? 'Reabrir' : 'Encerrar',
+        busyLabel: reopen ? 'Reabrindo...' : 'Encerrando...',
+        onConfirm: () => api.patch(`${ENDPOINT}/${row.id}/${reopen ? 'reopen' : 'close'}`),
+    });
+    if (!done) return;
+
+    toast(`Processo ${caseNumber} ${reopen ? 'reaberto' : 'encerrado'}.`);
+    flashRow(row.id);
+    await loadLawsuits();
 }
 
 /* Campos compartilhados ---------------------------------------------------- */
@@ -816,6 +857,7 @@ function openAppeals(lawsuit) {
             body.classList.add('appeals-modal');
             const view = { tab: 'trail', status: state.appeals.status === 'ready' ? 'ready' : 'loading', highlightId: null };
             const tabIds = { trail: `appeals-trail-${lawsuit.id}`, form: `appeals-form-${lawsuit.id}` };
+            const closedReason = isActiveRow(lawsuit) ? null : 'Processo encerrado não recebe recursos. Reabra-o para registrar um novo.';
 
             /* Resumo do processo */
             const strip = el('dl', 'case-strip');
@@ -905,6 +947,13 @@ function openAppeals(lawsuit) {
             const close = makeButton('Fechar', 'secondary');
             const toForm = makeButton('Novo recurso', 'primary');
             toForm.querySelector('.btn__spinner').after(iconNode('plus'));
+            // Processo encerrado: a trilha continua visível, mas não recebe recursos
+            if (closedReason) {
+                toForm.disabled = true;
+                toForm.title = closedReason;
+                tabs.form.disabled = true;
+                tabs.form.title = closedReason;
+            }
             const back = makeButton('Voltar à trilha', 'secondary');
             const submit = makeButton('Registrar recurso', 'primary', 'submit');
             footer.append(close, back, toForm, submit);
@@ -913,6 +962,7 @@ function openAppeals(lawsuit) {
             toForm.addEventListener('click', () => switchTab('form'));
 
             function switchTab(key, { focusTab = false } = {}) {
+                if (closedReason && key === 'form') return;
                 view.tab = key;
                 Object.entries(tabs).forEach(([name, tab]) => {
                     const selected = name === key;
@@ -962,15 +1012,19 @@ function openAppeals(lawsuit) {
                 } else if (!appeals.length) {
                     const item = el('li', 'trail__item trail__item--empty');
                     const content = el('div', 'trail__content trail__empty');
-                    const start = el('button', 'btn btn--secondary btn--sm');
-                    start.type = 'button';
-                    start.append(iconNode('plus'), el('span', null, 'Registrar o primeiro recurso'));
-                    start.addEventListener('click', () => switchTab('form'));
-                    content.append(
-                        el('p', 'trail__title', 'Nenhum recurso registrado'),
-                        el('p', 'trail__meta', 'Quando houver recurso contra a decisão, registre-o aqui para acompanhar cada instância.'),
-                        start,
-                    );
+                    content.append(el('p', 'trail__title', 'Nenhum recurso registrado'));
+                    if (closedReason) {
+                        content.append(el('p', 'trail__meta', closedReason));
+                    } else {
+                        const start = el('button', 'btn btn--secondary btn--sm');
+                        start.type = 'button';
+                        start.append(iconNode('plus'), el('span', null, 'Registrar o primeiro recurso'));
+                        start.addEventListener('click', () => switchTab('form'));
+                        content.append(
+                            el('p', 'trail__meta', 'Quando houver recurso contra a decisão, registre-o aqui para acompanhar cada instância.'),
+                            start,
+                        );
+                    }
                     item.append(el('span', 'trail__marker'), content);
                     list.append(item);
                 } else {
@@ -1038,7 +1092,7 @@ function openAppeals(lawsuit) {
             });
 
             const hasAppeals = appealsOf(lawsuit.id).length > 0;
-            switchTab(view.status === 'ready' && !hasAppeals ? 'form' : 'trail');
+            switchTab(view.status === 'ready' && !hasAppeals && !closedReason ? 'form' : 'trail');
             renderTrail();
             refresh();
         },
