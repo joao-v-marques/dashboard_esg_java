@@ -70,6 +70,14 @@ public class Lawsuit {
     @JoinColumn(name = "updated_by")
     private User updatedBy;
 
+    // false = processo encerrado
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
+
+    @Column(name = "closed_at")
+    private OffsetDateTime closedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "closed_by")
+    private User closedBy;
 }

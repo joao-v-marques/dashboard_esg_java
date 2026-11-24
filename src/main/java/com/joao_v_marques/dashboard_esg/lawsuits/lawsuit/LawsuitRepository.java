@@ -9,7 +9,7 @@ public interface LawsuitRepository extends JpaRepository<Lawsuit, Integer> {
 
     // Carrega as associações LAZY no mesmo SELECT (via JOIN), evitando o N+1 no toResponse
     @Override
-    @EntityGraph(attributePaths = {"subjectMatter", "proceedingStage", "status", "lossProbability", "insertedBy", "updatedBy"})
+    @EntityGraph(attributePaths = {"subjectMatter", "proceedingStage", "status", "lossProbability", "insertedBy", "updatedBy", "closedBy"})
     List<Lawsuit> findAll();
 
     boolean existsByCaseNumber(String caseNumber);
