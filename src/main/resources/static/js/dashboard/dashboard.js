@@ -23,6 +23,7 @@ import {
 import { stackedColumns, donut, hbars, tipContent } from './charts.js';
 import { showCooperados } from './cooperados.js';
 import { showNips } from './nips.js';
+import { showLawsuits } from './lawsuits.js';
 
 // Cor de cada tipo pela ordem de id (Reciclável → água, Não Reciclável → laranja, Orgânico → azul).
 // A cor acompanha o tipo, nunca a posição no gráfico; validadas para daltonismo em claro e escuro.
@@ -32,9 +33,9 @@ const COLOR_NOT_RECYCLED = 'var(--color-chart-2)';
 const COLOR_OTHER = 'var(--color-text-faint)';
 
 // Role mínima para ver cada tema (a aba fica oculta via data-requires-role no HTML)
-const THEME_ROLES = { residuos: 'EMPLOYEE_WASTES', cooperados: 'MANAGER', nips: 'EMPLOYEE_ANS' };
+const THEME_ROLES = { residuos: 'EMPLOYEE_WASTES', cooperados: 'MANAGER', nips: 'EMPLOYEE_ANS', processos: 'EMPLOYEE_LEGAL' };
 const THEMES = Object.keys(THEME_ROLES);
-const THEME_TITLES = { residuos: 'Resíduos', cooperados: 'Cooperados', nips: "NIP's" };
+const THEME_TITLES = { residuos: 'Resíduos', cooperados: 'Cooperados', nips: "NIP's", processos: 'Processos Jurídicos' };
 
 // Nenhum tema até o usuário carregar: não dá para saber quais ele pode ver
 let allowedThemes = [];
@@ -43,6 +44,7 @@ const tabsEl = document.querySelector('[data-theme-tabs]');
 const filtersEl = document.querySelector('[data-filters]');
 const coopFiltersEl = document.querySelector('[data-coop-filters]');
 const nipFiltersEl = document.querySelector('[data-nip-filters]');
+const lawsuitFiltersEl = document.querySelector('[data-lawsuit-filters]');
 const presetsEl = document.querySelector('[data-presets]');
 const fromInput = document.querySelector('[data-from]');
 const toInput = document.querySelector('[data-to]');
@@ -280,6 +282,7 @@ function selectTheme(theme) {
     }
     if (theme === 'cooperados') showCooperados();
     if (theme === 'nips') showNips();
+    if (theme === 'processos') showLawsuits();
 }
 
 function renderTheme() {
@@ -289,10 +292,11 @@ function renderTheme() {
         tab.tabIndex = active ? 0 : -1;
     });
     document.querySelectorAll('[data-panel]').forEach((panel) => { panel.hidden = panel.dataset.panel !== state.theme; });
-    // Cada tema tem os próprios filtros: período/unidade em Resíduos, ano-base em Cooperados, ano/natureza em NIP's
+    // Cada tema tem os próprios filtros: período/unidade em Resíduos, ano-base em Cooperados, ano/natureza em NIP's, objeto/justiça em Processos Jurídicos
     filtersEl.hidden = state.theme !== 'residuos';
     coopFiltersEl.hidden = state.theme !== 'cooperados';
     nipFiltersEl.hidden = state.theme !== 'nips';
+    lawsuitFiltersEl.hidden = state.theme !== 'processos';
     document.title = state.theme
         ? `Dashboard · ${THEME_TITLES[state.theme]} · Acompanhamento ESG`
         : 'Dashboard · Acompanhamento ESG';
