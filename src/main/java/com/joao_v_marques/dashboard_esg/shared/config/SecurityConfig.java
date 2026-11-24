@@ -41,6 +41,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/units/**").hasRole(Role.ADMINISTRATOR)
                         .requestMatchers(HttpMethod.PUT, "/api/units/**").hasRole(Role.ADMINISTRATOR)
 
+                        // Bancos também são compartilhados: todos leem, só ADMINISTRATOR cadastra/edita/ativa/desativa
+                        .requestMatchers(HttpMethod.POST, "/api/banks/**").hasRole(Role.ADMINISTRATOR)
+                        .requestMatchers(HttpMethod.PUT, "/api/banks/**").hasRole(Role.ADMINISTRATOR)
+                        .requestMatchers(HttpMethod.PATCH, "/api/banks/**").hasRole(Role.ADMINISTRATOR)
+
                         // Dashboard: quem vê ao menos um tema (Resíduos ou NIP's). Cada aba é escondida no front
                         // conforme a role, e a API de cada tema continua exigindo a própria role
                         .requestMatchers("/dashboard").hasAnyRole(Role.EMPLOYEE_WASTES, Role.EMPLOYEE_ANS)
