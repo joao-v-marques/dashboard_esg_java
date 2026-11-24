@@ -88,7 +88,6 @@ CREATE TABLE suppliers (
     bank_id INT NOT NULL, -- FK tabela banks
     agency VARCHAR(10) NOT NULL, -- Agência com dígito
     account VARCHAR(20) NOT NULL, -- Conta com dígito
-    account_type VARCHAR(20) NOT NULL, -- CHECKING (corrente) ou SAVINGS (poupança)
 
     inserted_by INT NOT NULL, -- FK users
     created_at TIMESTAMPTZ DEFAULT NOW(),
