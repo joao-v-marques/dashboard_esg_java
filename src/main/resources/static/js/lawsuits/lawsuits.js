@@ -319,7 +319,7 @@ function renderList() {
         actions: (row) => [
             { icon: 'eye', label: 'Ver detalhes', onClick: () => openDetails(row) },
             { icon: 'edit', label: 'Editar processo', onClick: () => openEdit(row), disabledReason: blockedReason(row) },
-            { icon: 'gavel', label: 'Recursos do processo', onClick: () => openAppeals(row), disabledReason: lookupsBlockedReason() },
+            // Recursos não entra aqui: o contador da coluna Recursos já abre o mesmo modal
             isActiveRow(row)
                 ? { icon: 'lock', label: 'Encerrar processo', tone: 'danger', onClick: () => toggleClosed(row) }
                 : { icon: 'restore', label: 'Reabrir processo', onClick: () => toggleClosed(row) },
@@ -517,12 +517,16 @@ function columns(counts) {
             },
         },
         {
-            label: 'Valor da causa',
+            // Valor e risco na mesma coluna: o risco é lido junto do valor exposto e a tabela cabe sem rolagem
+            label: 'Valor e risco',
             sortKey: 'value',
             className: 'col-num col-nowrap',
-            render: (row) => el('span', 'cell-money', currencyFormat.format(toAmount(row.claimValue))),
+            render: (row) => {
+                const cell = el('div', 'cell-value');
+                cell.append(el('span', 'cell-money', currencyFormat.format(toAmount(row.claimValue))), riskBadge(row.lossProbabilityName));
+                return cell;
+            },
         },
-        { label: 'Risco', render: (row) => riskBadge(row.lossProbabilityName) },
         { label: 'Recursos', render: (row) => appealChip(row, counts) },
     ];
 }

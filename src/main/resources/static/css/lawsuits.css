@@ -36,18 +36,17 @@
 .meter--risk .meter__fill { background: var(--color-danger); }
 
 /* Células ----------------------------------------------------------------- */
-.cell-case { display: grid; justify-items: start; gap: 1px; min-width: 190px; }
+.cell-case { display: grid; justify-items: start; gap: 1px; }
 .cell-case__number {
   font-weight: 700;
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 .cell-case__meta { font-size: var(--text-xs); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
 .cell-case__flag { margin-top: var(--space-1); }
 
-.cell-parties { display: grid; gap: 2px; min-width: 170px; max-width: 260px; }
+.cell-parties { display: grid; gap: 2px; min-width: 120px; max-width: 240px; }
 .cell-parties__line { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
 .cell-parties__role { flex: none; width: 2.4em; font-size: var(--text-xs); font-weight: 600; color: var(--color-text-faint); }
 .cell-parties__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text); }
@@ -64,7 +63,7 @@
   line-height: 1.4;
 }
 
-.cell-progress { display: grid; gap: 2px; min-width: 170px; }
+.cell-progress { display: grid; gap: 2px; min-width: 120px; }
 .cell-progress__status { color: var(--color-text); }
 .cell-progress__stage {
   max-width: 240px;
@@ -76,6 +75,14 @@
 }
 
 .cell-money { font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
+.cell-value { display: grid; justify-items: end; gap: var(--space-1); }
+
+/* Objeto quebra em qualquer ponto: palavras longas ("(DERMOLIPECTOMIA") não alargam a coluna */
+.lawsuits-table .lawsuits-col-subject .cell-clamp { min-width: 110px; overflow-wrap: anywhere; }
+
+/* Tabela inteira na largura da página, sem rolagem lateral: espaçamento menor entre colunas */
+.lawsuits-table .table th,
+.lawsuits-table .table td { padding-left: var(--space-3); padding-right: var(--space-3); }
 
 /* Contador de recursos: atalho para o modal ------------------------------- */
 .appeal-chip {
@@ -313,7 +320,7 @@
 }
 
 /* Telas médias: o objeto sai da tabela para caber sem rolagem (volta no modo card e no detalhe) */
-@media (max-width: 1100px) and (min-width: 641px) {
+@media (max-width: 1365px) and (min-width: 641px) {
   .lawsuits-table .lawsuits-col-subject { display: none; }
 }
 
@@ -331,6 +338,7 @@
   .cell-progress { min-width: 0; max-width: none; }
   .cell-clamp,
   .cell-progress__stage { max-width: none; }
+  .cell-value { justify-items: start; }
 
   .case-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: var(--space-4); }
   .appeals-tabs { display: flex; justify-self: stretch; }
