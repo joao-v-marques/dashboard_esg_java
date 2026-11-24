@@ -54,6 +54,22 @@ function tribunalName(segment, code) {
     return `Tribunal ${code}`;
 }
 
+// Justiça (J) e tribunal (TR) de um número CNJ completo; null nos campos se o número estiver incompleto
+export function caseCourt(value) {
+    const digits = onlyDigits(value);
+    if (digits.length < 16) return { segment: null, segmentName: null, tribunal: null };
+    const segment = digits[13];
+    return {
+        segment,
+        segmentName: SEGMENTS[segment] ?? `Segmento ${segment}`,
+        tribunal: tribunalName(segment, digits.slice(14, 16)),
+    };
+}
+
+// Ação trabalhista: processo da Justiça do Trabalho (J = 5 no número CNJ)
+export const LABOR_SEGMENT = '5';
+export const isLabor = (row) => caseCourt(row.caseNumber).segment === LABOR_SEGMENT;
+
 // Lê o número CNJ conforme é digitado: cada parte aparece quando estiver completa (null antes disso)
 export function describeCaseNumber(value) {
     const digits = onlyDigits(value).slice(0, CASE_NUMBER_DIGITS);
