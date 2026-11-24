@@ -67,7 +67,7 @@ public class LawsuitAppealService {
         Lawsuit lawsuit = lawsuitRepository.findById(lawsuitId)
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum processo com o ID informado."));
         if (!lawsuit.isActive()) {
-            throw new IllegalArgumentException("Não é possível cadastrar recursos em um processo inativo.");
+            throw new IllegalArgumentException("Não é possível cadastrar recursos em um processo encerrado.");
         }
 
         // Validação da FK de judgingBody, precisa existir e estar ativa

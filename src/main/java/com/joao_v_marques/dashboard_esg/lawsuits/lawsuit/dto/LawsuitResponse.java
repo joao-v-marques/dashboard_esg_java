@@ -25,6 +25,9 @@ public record LawsuitResponse(
         OffsetDateTime updatedAt,
         Integer updatedById,
         String updatedByName,
-        boolean isActive
+        boolean isActive,
+        OffsetDateTime closedAt,
+        Integer closedById,
+        String closedByName
 ) {
 }

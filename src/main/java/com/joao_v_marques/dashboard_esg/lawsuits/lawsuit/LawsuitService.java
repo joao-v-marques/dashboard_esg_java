@@ -115,7 +115,7 @@ public class LawsuitService {
                 .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum processo com o ID informado."));
 
         if (!lawsuit.isActive()) {
-            throw new IllegalArgumentException("Não é possível editar uma ocorrência inativa.");
+            throw new IllegalArgumentException("Não é possível editar um processo encerrado.");
         }
 
         // Validação de duplicidade, ignorando o próprio processo
@@ -173,6 +173,49 @@ public class LawsuitService {
         return toResponse(lawsuit);
     }
 
+    @Transactional
+    public LawsuitResponse close(Integer lawsuitId, UserPrincipal currentUser) {
+        // Valida se o processo encerrado realmente existe
+        Lawsuit lawsuit = lawsuitRepository.findById(lawsuitId)
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum processo com o ID informado."));
+
+        if (!lawsuit.isActive()) {
+            throw new IllegalArgumentException("Este processo já está encerrado.");
+        }
+
+        User closedBy = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado usuário com o ID informado."));
+
+        lawsuit.setActive(false);
+        lawsuit.setClosedAt(OffsetDateTime.now());
+        lawsuit.setClosedBy(closedBy);
+
+        return toResponse(lawsuit);
+    }
+
+    @Transactional
+    public LawsuitResponse reopen(Integer lawsuitId, UserPrincipal currentUser) {
+        // Valida se o processo reaberto realmente existe
+        Lawsuit lawsuit = lawsuitRepository.findById(lawsuitId)
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado nenhum processo com o ID informado."));
+
+        if (lawsuit.isActive()) {
+            throw new IllegalArgumentException("Este processo já está ativo.");
+        }
+
+        User updatedBy = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Não foi encontrado usuário com o ID informado."));
+
+        // A reabertura fica registrada como edição; o encerramento anterior é descartado
+        lawsuit.setActive(true);
+        lawsuit.setClosedAt(null);
+        lawsuit.setClosedBy(null);
+        lawsuit.setUpdatedAt(OffsetDateTime.now());
+        lawsuit.setUpdatedBy(updatedBy);
+
+        return toResponse(lawsuit);
+    }
+
     private LawsuitResponse toResponse(Lawsuit lawsuit) {
         return new LawsuitResponse(
                 lawsuit.getId(),
@@ -195,7 +238,10 @@ public class LawsuitService {
                 lawsuit.getUpdatedAt(),
                 lawsuit.getUpdatedBy() != null ? lawsuit.getUpdatedBy().getId() : null,
                 lawsuit.getUpdatedBy() != null ? lawsuit.getUpdatedBy().getName() : null,
-                lawsuit.isActive()
+                lawsuit.isActive(),
+                lawsuit.getClosedAt(),
+                lawsuit.getClosedBy() != null ? lawsuit.getClosedBy().getId() : null,
+                lawsuit.getClosedBy() != null ? lawsuit.getClosedBy().getName() : null
         );
     }
 }

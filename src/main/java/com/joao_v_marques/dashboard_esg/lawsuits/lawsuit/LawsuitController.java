@@ -49,4 +49,20 @@ public class LawsuitController {
 
         return ResponseEntity.ok(updated);
     }
+
+    // PATCH para encerrar um processo (is_active = false)
+    @PatchMapping(value = "/{id}/close")
+    public ResponseEntity<LawsuitResponse> close(@PathVariable Integer id, @AuthenticationPrincipal UserPrincipal currentUser) {
+        LawsuitResponse closed = service.close(id, currentUser);
+
+        return ResponseEntity.ok(closed);
+    }
+
+    // PATCH para reabrir um processo encerrado
+    @PatchMapping(value = "/{id}/reopen")
+    public ResponseEntity<LawsuitResponse> reopen(@PathVariable Integer id, @AuthenticationPrincipal UserPrincipal currentUser) {
+        LawsuitResponse reopened = service.reopen(id, currentUser);
+
+        return ResponseEntity.ok(reopened);
+    }
 }
