@@ -758,6 +758,7 @@ function appealFields(lawsuit) {
         return row && isActiveRow(row) ? id : null;
     };
     return {
+        // Grade de 4 colunas (modal xl): identificação e risco na 1ª linha, partes na 2ª, órgão e status na 3ª
         fields: [
             {
                 name: 'appealNumber', label: 'Número do recurso', required: true, maxLength: 35, autocomplete: 'off',
@@ -770,19 +771,19 @@ function appealFields(lawsuit) {
                     ? `A data do recurso não pode ser anterior à do processo (${formatDay(lawsuit.lawsuitDate)}).`
                     : null),
             },
-            { name: 'appellant', label: 'Recorrente', required: true, maxLength: 255, autocomplete: 'off' },
-            { name: 'appellee', label: 'Recorrido', required: true, maxLength: 255, autocomplete: 'off' },
-            {
-                name: 'judgingBodyId', label: 'Órgão julgador', type: 'select', required: true, valueType: 'number', full: true,
-                options: lookupOptions('bodies'),
-            },
-            moneyField('claimValue', 'Valor da causa', { help: 'Preenchido com o valor do processo; ajuste se o recurso discutir outro valor.' }),
+            moneyField('claimValue', 'Valor da causa', { help: 'Vem do processo; ajuste se o recurso discutir outro valor.' }),
             {
                 name: 'lossProbabilityId', label: 'Probabilidade de perda', type: 'select', required: true, valueType: 'number',
                 options: lookupOptions('risks'),
             },
+            { name: 'appellant', label: 'Recorrente', required: true, maxLength: 255, autocomplete: 'off', span: 2 },
+            { name: 'appellee', label: 'Recorrido', required: true, maxLength: 255, autocomplete: 'off', span: 2 },
             {
-                name: 'statusId', label: 'Status', type: 'select', required: true, valueType: 'number', full: true,
+                name: 'judgingBodyId', label: 'Órgão julgador', type: 'select', required: true, valueType: 'number', span: 2,
+                options: lookupOptions('bodies'),
+            },
+            {
+                name: 'statusId', label: 'Status', type: 'select', required: true, valueType: 'number', span: 2,
                 options: lookupOptions('statuses'),
             },
         ],
@@ -824,7 +825,11 @@ function appealNode(appeal, { latest, highlight }) {
     if (latest) kicker.append(el('span', 'trail__latest', 'Mais recente'));
     head.append(kicker, el('span', 'trail__date', formatDay(appeal.appealDate)));
 
-    const number = el('p', 'trail__number', appeal.appealNumber);
+    // Número e registro na mesma linha, para o card não ganhar um rodapé só para isso
+    const numberRow = el('div', 'trail__number-row');
+    numberRow.append(el('p', 'trail__number', appeal.appealNumber));
+    const audit = auditText(appeal.createdAt, appeal.insertedByName);
+    if (audit) numberRow.append(el('span', 'trail__audit', `Registrado em ${audit}`));
 
     const facts = el('dl', 'trail__facts');
     [
@@ -832,18 +837,16 @@ function appealNode(appeal, { latest, highlight }) {
         ['Recorrido', appeal.appellee],
         ['Valor da causa', currencyFormat.format(toAmount(appeal.claimValue))],
         ['Status', appeal.statusName],
+        ['Risco', riskBadge(appeal.lossProbabilityName)],
     ].forEach(([label, value]) => {
         const row = el('div', label === 'Status' ? 'is-full' : '');
-        row.append(el('dt', null, label), el('dd', null, value));
+        const dd = el('dd');
+        dd.append(value);
+        row.append(el('dt', null, label), dd);
         facts.append(row);
     });
 
-    const foot = el('div', 'trail__foot');
-    foot.append(riskBadge(appeal.lossProbabilityName));
-    const audit = auditText(appeal.createdAt, appeal.insertedByName);
-    if (audit) foot.append(el('span', 'trail__audit', `Registrado em ${audit}`));
-
-    content.append(head, el('p', 'trail__title', appeal.judgingBodyName), number, facts, foot);
+    content.append(head, el('p', 'trail__title', appeal.judgingBodyName), numberRow, facts);
     item.append(marker, content);
     return item;
 }
@@ -856,7 +859,7 @@ function openAppeals(lawsuit) {
         title: 'Recursos do processo',
         description: caseNumber,
         iconName: 'gavel',
-        size: 'lg',
+        size: 'xl',
         render: ({ form, body, footer, alert, finish, setBusy, showAlert, makeButton, setButtonBusy }) => {
             body.classList.add('appeals-modal');
             const view = { tab: 'trail', status: state.appeals.status === 'ready' ? 'ready' : 'loading', highlightId: null };
@@ -925,7 +928,7 @@ function openAppeals(lawsuit) {
             let controller = null;
             const mountForm = () => {
                 const { fields, values } = appealFields(lawsuit);
-                controller = mountFormFields(form, { fields, values, columns: 2, alert });
+                controller = mountFormFields(form, { fields, values, columns: 4, alert });
                 formPanel.replaceChildren(assist, controller.grid);
                 partiesButton.lastElementChild.textContent = 'Usar as partes do processo';
             };
