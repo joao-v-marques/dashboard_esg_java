@@ -151,6 +151,7 @@ CREATE TABLE qualification_documents (
     -- Documento
     name VARCHAR(255) NOT NULL, -- Nome do documento inserido
     description VARCHAR(255) NOT NULL, -- Texto livre (autocomplete com as descrições já usadas)
+    document_path VARCHAR(255) NOT NULL UNIQUE, -- Caminho do documento na VM
 
     -- Validade
     has_expiry BOOLEAN NOT NULL, -- Checkbox "Possui validade?"
